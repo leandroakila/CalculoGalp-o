@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Balcão Interativo</title>
+<title>Calculadora Completa de Galpão</title>
 
 <style>
 body{
@@ -13,7 +13,7 @@ body{
 
 .container{
     background:white;
-    width:900px;
+    width:1000px;
     margin:20px auto;
     padding:20px;
     border-radius:10px;
@@ -21,14 +21,14 @@ body{
 }
 
 input{
-    width:100px;
+    width:120px;
     padding:5px;
     margin:5px;
 }
 
 button{
     padding:10px 20px;
-    margin-top:10px;
+    margin:5px;
     cursor:pointer;
     background:#007bff;
     color:white;
@@ -36,8 +36,11 @@ button{
     border-radius:5px;
 }
 
+.aba{ display:none; }
+.ativa{ display:block; }
+
 #desenho{
-    margin-top:30px;
+    margin-top:20px;
     border:2px solid #333;
     position:relative;
     display:inline-block;
@@ -53,17 +56,18 @@ button{
     cursor:pointer;
 }
 
-.ativo{
-    background:red;
-}
-
-.inativo{
-    background:#ccc;
-}
+.ativo{ background:red; }
+.inativo{ background:#ccc; }
 
 .resultado{
     margin-top:20px;
     font-weight:bold;
+}
+
+canvas{
+    margin-top:20px;
+    border:2px solid #333;
+    background:#fafafa;
 }
 </style>
 </head>
@@ -72,12 +76,18 @@ button{
 
 <div class="container">
 
-<h2>Balcão Interativo com Pilares</h2>
+<h2>Calculadora Estrutural de Galpão</h2>
+
+<button onclick="mudarAba('pilares')">Pilares</button>
+<button onclick="mudarAba('tesoura')">Tesoura + Cobertura</button>
+
+<!-- ================== ABA PILARES ================== -->
+<div id="pilares" class="aba ativa">
 
 Largura (m): <input type="number" id="largura"><br>
 Comprimento (m): <input type="number" id="comprimento"><br>
 Altura (m): <input type="number" id="altura"><br>
-Espaçamento (m): <input type="number" id="metros"><br>
+Espaçamento entre pilares (m): <input type="number" id="metros"><br>
 
 <label>
 <input type="checkbox" id="semMeio">
@@ -85,17 +95,47 @@ Não colocar pilares internos
 </label>
 
 <br>
-<button onclick="gerar()">Gerar</button>
+<button onclick="gerar()">Gerar Pilares</button>
 
 <div class="resultado" id="resultado"></div>
-
 <div id="desenho"></div>
+
+</div>
+
+<!-- ================== ABA TESOURA ================== -->
+<div id="tesoura" class="aba">
+
+Inclinação do telhado (%): 
+<input type="number" id="inclinacao" value="10"><br>
+
+Comprimento da Telha (m):
+<input type="number" id="compTelha" value="6"><br>
+
+Largura útil da Telha (m):
+<input type="number" id="largTelha" value="1"><br>
+
+Espaçamento entre Terças (m):
+<input type="number" id="espTerca" value="1.5"><br>
+
+<button onclick="calcularTesoura()">Calcular Estrutura</button>
+
+<div class="resultado" id="resultadoTesoura"></div>
+<canvas id="desenhoTesoura" width="700" height="350"></canvas>
+
+</div>
 
 </div>
 
 <script>
 
 let alturaGlobal = 0;
+
+function mudarAba(id){
+    document.querySelectorAll(".aba").forEach(a=>a.classList.remove("ativa"));
+    document.getElementById(id).classList.add("ativa");
+}
+
+/* ================== PILARES ================== */
 
 function gerar(){
 
@@ -112,10 +152,10 @@ function gerar(){
 
     alturaGlobal = altura;
 
-    let pilaresLargura = Math.floor(largura / metros) + 1;
-    let pilaresComprimento = Math.floor(comprimento / metros) + 1;
+    let pl = Math.floor(largura / metros) + 1;
+    let pc = Math.floor(comprimento / metros) + 1;
 
-    desenhar(largura, comprimento, pilaresLargura, pilaresComprimento, semMeio);
+    desenhar(largura, comprimento, pl, pc, semMeio);
 }
 
 function desenhar(largura, comprimento, pl, pc, semMeio){
@@ -124,7 +164,6 @@ function desenhar(largura, comprimento, pl, pc, semMeio){
     desenho.innerHTML = "";
 
     let escala = 25;
-
     desenho.style.width = (largura * escala) + "px";
     desenho.style.height = (comprimento * escala) + "px";
 
@@ -143,25 +182,16 @@ function desenhar(largura, comprimento, pl, pc, semMeio){
             ponto.style.top = (j*espacY)+"px";
 
             if(semMeio){
-                if(borda){
-                    ponto.classList.add("ativo");
-                }else{
-                    ponto.classList.add("inativo");
-                }
+                ponto.classList.add(borda ? "ativo" : "inativo");
             }else{
                 ponto.classList.add("ativo");
             }
 
-            ponto.addEventListener("click",function(){
-                if(ponto.classList.contains("ativo")){
-                    ponto.classList.remove("ativo");
-                    ponto.classList.add("inativo");
-                }else{
-                    ponto.classList.remove("inativo");
-                    ponto.classList.add("ativo");
-                }
+            ponto.onclick = function(){
+                ponto.classList.toggle("ativo");
+                ponto.classList.toggle("inativo");
                 atualizarResultado();
-            });
+            }
 
             desenho.appendChild(ponto);
         }
@@ -171,14 +201,92 @@ function desenhar(largura, comprimento, pl, pc, semMeio){
 }
 
 function atualizarResultado(){
-
     let ativos = document.querySelectorAll(".ativo").length;
     let metrosColunas = ativos * alturaGlobal;
 
-    document.getElementById("resultado").innerHTML = `
-        Total de Colunas: ${ativos}<br>
-        Metros Totais de Colunas: ${metrosColunas.toFixed(2)} m
+    document.getElementById("resultado").innerHTML =
+        `Total de Colunas: ${ativos}<br>
+         Metros Totais de Colunas: ${metrosColunas.toFixed(2)} m`;
+}
+
+/* ================== TESOURA + COBERTURA ================== */
+
+function calcularTesoura(){
+
+    let largura = parseFloat(document.getElementById("largura").value);
+    let comprimento = parseFloat(document.getElementById("comprimento").value);
+    let metros = parseFloat(document.getElementById("metros").value);
+    let inclinacao = parseFloat(document.getElementById("inclinacao").value);
+    let compTelha = parseFloat(document.getElementById("compTelha").value);
+    let largTelha = parseFloat(document.getElementById("largTelha").value);
+    let espTerca = parseFloat(document.getElementById("espTerca").value);
+
+    if(!largura || !comprimento || !metros){
+        alert("Preencha os dados na aba pilares primeiro!");
+        return;
+    }
+
+    /* TESOURAS */
+    let qtdTesouras = Math.floor(comprimento / metros) + 1;
+    let meio = largura / 2;
+    let alturaCumeeira = (inclinacao/100) * meio;
+    let compAgua = Math.sqrt(meio**2 + alturaCumeeira**2);
+
+    /* TELHAS */
+    let areaTelhado = comprimento * (2 * compAgua);
+    let areaTelha = compTelha * largTelha;
+    let qtdTelhas = Math.ceil(areaTelhado / areaTelha);
+
+    /* TERÇAS */
+    let linhasTercas = Math.ceil(compAgua / espTerca) + 1;
+    let totalTercas = linhasTercas * 2;
+    let compTotalTercas = totalTercas * comprimento;
+
+    /* CALHAS */
+    let qtdCalhas = 2;
+    let compCalhas = 2 * comprimento;
+
+    document.getElementById("resultadoTesoura").innerHTML = `
+        <b>TESOURAS</b><br>
+        Quantidade: ${qtdTesouras}<br>
+        Altura Cumeeira: ${alturaCumeeira.toFixed(2)} m<br><br>
+
+        <b>TELHAS</b><br>
+        Área Total: ${areaTelhado.toFixed(2)} m²<br>
+        Quantidade: ${qtdTelhas}<br><br>
+
+        <b>TERÇAS</b><br>
+        Linhas por água: ${linhasTercas}<br>
+        Total de peças: ${totalTercas}<br>
+        Comprimento total: ${compTotalTercas.toFixed(2)} m<br><br>
+
+        <b>CALHAS</b><br>
+        Quantidade: ${qtdCalhas}<br>
+        Comprimento total: ${compCalhas.toFixed(2)} m
     `;
+
+    desenharTesoura(largura, alturaCumeeira);
+}
+
+function desenharTesoura(largura, altura){
+
+    let canvas = document.getElementById("desenhoTesoura");
+    let ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    let escala = 35;
+    let base = largura * escala;
+    let alt = altura * escala;
+
+    let inicioX = (canvas.width - base)/2;
+    let baseY = canvas.height - 50;
+
+    ctx.beginPath();
+    ctx.moveTo(inicioX, baseY);
+    ctx.lineTo(inicioX + base/2, baseY - alt);
+    ctx.lineTo(inicioX + base, baseY);
+    ctx.closePath();
+    ctx.stroke();
 }
 
 </script>
