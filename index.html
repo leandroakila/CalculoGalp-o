@@ -1,302 +1,2588 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Calculadora Completa de Galpão</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEELCALC PRO - Sistema de Orçamentação de Galpões Metálicos</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-body{
-    font-family: Arial;
-    background:#f2f2f2;
-    text-align:center;
+/* ===== RESET E CONFIGURAÇÕES BÁSICAS ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.container{
-    background:white;
-    width:1000px;
-    margin:20px auto;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.2);
+:root {
+    --primary-color: #1a237e;
+    --secondary-color: #ff6f00;
+    --success-color: #4CAF50;
+    --danger-color: #f44336;
+    --warning-color: #FF9800;
+    --info-color: #2196F3;
+    --text-dark: #333;
+    --text-light: #666;
+    --border-color: #ddd;
+    --bg-light: #f5f5f5;
+    --white: #ffffff;
+    --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-input{
-    width:120px;
-    padding:5px;
-    margin:5px;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-dark);
+    background: var(--bg-light);
+    line-height: 1.6;
 }
 
-button{
-    padding:10px 20px;
-    margin:5px;
-    cursor:pointer;
-    background:#007bff;
-    color:white;
-    border:none;
-    border-radius:5px;
+/* ===== HEADER ===== */
+.header {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
 }
 
-.aba{ display:none; }
-.ativa{ display:block; }
-
-#desenho{
-    margin-top:20px;
-    border:2px solid #333;
-    position:relative;
-    display:inline-block;
-    background:#e9e9e9;
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.ponto{
-    width:16px;
-    height:16px;
-    border-radius:50%;
-    position:absolute;
-    transform:translate(-50%,-50%);
-    cursor:pointer;
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
-.ativo{ background:red; }
-.inativo{ background:#ccc; }
-
-.resultado{
-    margin-top:20px;
-    font-weight:bold;
+.logo i {
+    font-size: 2rem;
 }
 
-canvas{
-    margin-top:20px;
-    border:2px solid #333;
-    background:#fafafa;
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
 }
+
+.header-info {
+    font-size: 0.9rem;
+}
+
+/* ===== CONTAINER PRINCIPAL ===== */
+.container {
+    display: flex;
+    margin-top: 80px;
+    min-height: calc(100vh - 80px);
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 250px;
+    background: var(--white);
+    box-shadow: var(--shadow);
+    position: fixed;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.nav-item i {
+    font-size: 1.2rem;
+    width: 20px;
+    text-align: center;
+}
+
+.nav-item:hover {
+    background: var(--bg-light);
+    border-left-color: var(--secondary-color);
+}
+
+.nav-item.active {
+    background: linear-gradient(to right, #fff3e0, var(--white));
+    border-left-color: var(--secondary-color);
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+/* ===== CONTEÚDO PRINCIPAL ===== */
+.main-content {
+    margin-left: 250px;
+    padding: 2rem;
+    flex: 1;
+    max-width: calc(100vw - 250px);
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.page-header h2 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+}
+
+.breadcrumb {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* ===== CARDS DE ESTATÍSTICAS ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.8rem;
+}
+
+.stat-info h3 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.stat-info p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* ===== SECTION CARD ===== */
+.section-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+}
+
+.section-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.section-title {
+    background: linear-gradient(to right, var(--primary-color), #283593);
+    color: var(--white);
+    padding: 1rem 1.5rem;
+    margin: -2rem -2rem 1.5rem -2rem;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+/* ===== FORMULÁRIOS ===== */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
+}
+
+/* ===== INFO BOX ===== */
+.info-box {
+    background: #e3f2fd;
+    border-left: 4px solid var(--info-color);
+    padding: 1rem;
+    border-radius: 4px;
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.info-box i {
+    color: var(--info-color);
+    font-size: 1.5rem;
+}
+
+.info-box strong {
+    color: var(--primary-color);
+}
+
+/* ===== MODELOS ESTRUTURAIS ===== */
+.modelo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.modelo-card {
+    cursor: pointer;
+}
+
+.modelo-card input[type="radio"] {
+    display: none;
+}
+
+.modelo-content {
+    background: var(--white);
+    border: 2px solid var(--border-color);
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.modelo-content i {
+    font-size: 3rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+.modelo-content h4 {
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.modelo-content p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.modelo-card:hover .modelo-content {
+    border-color: var(--secondary-color);
+    box-shadow: var(--shadow);
+    transform: translateY(-3px);
+}
+
+.modelo-card input[type="radio"]:checked + .modelo-content {
+    border-color: var(--secondary-color);
+    background: linear-gradient(to bottom, #fff3e0, var(--white));
+}
+
+.modelo-card input[type="radio"]:checked + .modelo-content i {
+    color: var(--secondary-color);
+}
+
+/* ===== BOTÕES ===== */
+.btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--secondary-color);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: #f57c00;
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--text-light);
+    color: var(--white);
+}
+
+.btn-secondary:hover {
+    background: #555;
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background: #d32f2f;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+/* ===== TABELAS ===== */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+table thead {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+table th,
+table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+table tbody tr {
+    transition: background 0.2s ease;
+}
+
+table tbody tr:hover {
+    background: var(--bg-light);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-light);
+    padding: 3rem !important;
+    font-style: italic;
+}
+
+/* ===== FILTROS ===== */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filter-bar input,
+.filter-bar select {
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    flex: 1;
+}
+
+/* ===== BADGES ===== */
+.badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: #c8e6c9;
+    color: #2e7d32;
+}
+
+.badge-warning {
+    background: #ffe0b2;
+    color: #ef6c00;
+}
+
+.badge-danger {
+    background: #ffcdd2;
+    color: #c62828;
+}
+
+.badge-info {
+    background: #b3e5fc;
+    color: #01579b;
+}
+
+/* ===== AÇÕES DE TABELA ===== */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+}
+
+.action-btn:hover {
+    background: var(--bg-light);
+}
+
+.action-btn.view {
+    color: var(--info-color);
+}
+
+.action-btn.edit {
+    color: var(--warning-color);
+}
+
+.action-btn.delete {
+    color: var(--danger-color);
+}
+
+/* ===== TABELA DE PREÇOS ===== */
+.price-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.price-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.price-item label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.price-item input {
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* ===== BACKUP ACTIONS ===== */
+.backup-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* ===== MODAIS ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    overflow-y: auto;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: var(--white);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+.modal-large {
+    max-width: 1200px;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--primary-color);
+    color: var(--white);
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--white);
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.modal-close:hover {
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 2rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* ===== ORÇAMENTO ===== */
+.orcamento-container {
+    background: var(--white);
+}
+
+.orcamento-header {
+    text-align: center;
+    padding: 2rem;
+    border-bottom: 3px solid var(--secondary-color);
+}
+
+.orcamento-header h1 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.orcamento-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 0.5rem;
+}
+
+.info-section p {
+    margin: 0.5rem 0;
+}
+
+.info-section strong {
+    color: var(--text-dark);
+}
+
+.orcamento-table {
+    padding: 2rem;
+}
+
+.orcamento-table table {
+    margin-top: 0;
+}
+
+.category-header {
+    background: var(--bg-light) !important;
+    font-weight: 700 !important;
+    color: var(--primary-color) !important;
+}
+
+.subtotal-row {
+    background: var(--bg-light) !important;
+    font-weight: 600 !important;
+}
+
+.total-row {
+    background: var(--secondary-color) !important;
+    color: var(--white) !important;
+    font-weight: 700 !important;
+    font-size: 1.2rem !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.extras-list {
+    margin-top: 1rem;
+}
+
+.extra-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    background: var(--bg-light);
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+}
+
+.extra-item button {
+    background: var(--danger-color);
+    color: var(--white);
+    border: none;
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 200px;
+    }
+    
+    .main-content {
+        margin-left: 200px;
+        max-width: calc(100vw - 200px);
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        max-width: 100vw;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .orcamento-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== UTILITÁRIOS ===== */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+
+.hidden {
+    display: none;
+}
+
 </style>
 </head>
-
 <body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-industry"></i>
+                <h1>STEELCALC PRO</h1>
+            </div>
+            <div class="header-info">
+                <span id="current-date"></span>
+            </div>
+        </div>
+    </header>
 
-<div class="container">
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-page="novo-projeto">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Novo Projeto</span>
+                </a>
+                <a href="#" class="nav-item" data-page="meus-projetos">
+                    <i class="fas fa-folder-open"></i>
+                    <span>Meus Projetos</span>
+                </a>
+                <a href="#" class="nav-item" data-page="clientes">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+                <a href="#" class="nav-item" data-page="tabela-precos">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Tabela de Preços</span>
+                </a>
+                <a href="#" class="nav-item" data-page="configuracoes">
+                    <i class="fas fa-cog"></i>
+                    <span>Configurações</span>
+                </a>
+            </nav>
+        </aside>
 
-<h2>Calculadora Estrutural de Galpão</h2>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <h2>Bem-vindo ao STEELCALC PRO</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #4CAF50;">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-projetos">0</h3>
+                            <p>Total de Projetos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #2196F3;">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="total-clientes">0</h3>
+                            <p>Clientes Ativos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #FF9800;">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="projetos-mes">0</h3>
+                            <p>Orçamentos Este Mês</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #E91E63;">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="valor-total">R$ 0,00</h3>
+                            <p>Valor Total</p>
+                        </div>
+                    </div>
+                </div>
 
-<button onclick="mudarAba('pilares')">Pilares</button>
-<button onclick="mudarAba('tesoura')">Tesoura + Cobertura</button>
+                <div class="section-card">
+                    <h3>Projetos Recentes</h3>
+                    <div class="table-container">
+                        <table id="tabela-projetos-recentes">
+                            <thead>
+                                <tr>
+                                    <th>Nº Proposta</th>
+                                    <th>Cliente</th>
+                                    <th>Data</th>
+                                    <th>Tipo</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" class="empty-state">Nenhum projeto cadastrado ainda</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-<!-- ================== ABA PILARES ================== -->
-<div id="pilares" class="aba ativa">
+            <!-- Novo Projeto Page -->
+            <div id="novo-projeto" class="page">
+                <div class="page-header">
+                    <h2>Novo Projeto de Galpão Metálico</h2>
+                    <p class="breadcrumb">Dashboard / Novo Projeto</p>
+                </div>
 
-Largura (m): <input type="number" id="largura"><br>
-Comprimento (m): <input type="number" id="comprimento"><br>
-Altura (m): <input type="number" id="altura"><br>
-Espaçamento entre pilares (m): <input type="number" id="metros"><br>
+                <form id="form-projeto">
+                    <!-- Dados do Cliente -->
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="fas fa-user"></i> DADOS DO CLIENTE</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nome Completo *</label>
+                                <input type="text" name="nomeCliente" required>
+                            </div>
+                            <div class="form-group">
+                                <label>E-mail</label>
+                                <input type="email" name="emailCliente">
+                            </div>
+                            <div class="form-group">
+                                <label>CPF/CNPJ *</label>
+                                <input type="text" name="cpfCliente" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Telefone *</label>
+                                <input type="text" name="telefoneCliente" required>
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Endereço</label>
+                                <input type="text" name="enderecoCliente">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Observações</label>
+                                <textarea name="observacoesCliente" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
 
-<label>
-<input type="checkbox" id="semMeio">
-Não colocar pilares internos
-</label>
+                    <!-- Geometria da Estrutura -->
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="fas fa-ruler-combined"></i> GEOMETRIA DA ESTRUTURA</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Largura (m) *</label>
+                                <input type="number" name="largura" step="0.1" required min="3" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Comprimento (m) *</label>
+                                <input type="number" name="comprimento" step="0.1" required min="3" max="200">
+                            </div>
+                            <div class="form-group">
+                                <label>Pé-direito (m) *</label>
+                                <input type="number" name="peDireito" step="0.1" required min="2.5" max="15">
+                            </div>
+                            <div class="form-group">
+                                <label>Espaçamento entre eixos (m) *</label>
+                                <input type="number" name="espacamento" step="0.1" required min="3" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label>Inclinação (%) *</label>
+                                <input type="number" name="inclinacao" step="0.5" required min="5" max="30">
+                            </div>
+                            <div class="form-group">
+                                <label>Beiral (m) *</label>
+                                <input type="number" name="beiral" step="0.1" required min="0" max="3">
+                            </div>
+                        </div>
 
-<br>
-<button onclick="gerar()">Gerar Pilares</button>
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Informações Calculadas:</strong>
+                                <p id="info-calculada">Preencha os campos acima para ver os cálculos automáticos</p>
+                            </div>
+                        </div>
+                    </div>
 
-<div class="resultado" id="resultado"></div>
-<div id="desenho"></div>
+                    <!-- Modelo Estrutural -->
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="fas fa-building"></i> MODELO ESTRUTURAL</h3>
+                        <div class="modelo-grid">
+                            <label class="modelo-card">
+                                <input type="radio" name="modeloEstrutural" value="duas-aguas" required checked>
+                                <div class="modelo-content">
+                                    <i class="fas fa-home"></i>
+                                    <h4>Duas Águas</h4>
+                                    <p>Cobertura tradicional</p>
+                                </div>
+                            </label>
 
-</div>
+                            <label class="modelo-card">
+                                <input type="radio" name="modeloEstrutural" value="uma-agua" required>
+                                <div class="modelo-content">
+                                    <i class="fas fa-angle-right"></i>
+                                    <h4>Uma Água</h4>
+                                    <p>Caimento único</p>
+                                </div>
+                            </label>
 
-<!-- ================== ABA TESOURA ================== -->
-<div id="tesoura" class="aba">
+                            <label class="modelo-card">
+                                <input type="radio" name="modeloEstrutural" value="arco-trelicado" required>
+                                <div class="modelo-content">
+                                    <i class="fas fa-archway"></i>
+                                    <h4>Arco Treliçado</h4>
+                                    <p>Estrutura em arco</p>
+                                </div>
+                            </label>
 
-Inclinação do telhado (%): 
-<input type="number" id="inclinacao" value="10"><br>
+                            <label class="modelo-card">
+                                <input type="radio" name="modeloEstrutural" value="trelica-paralela" required>
+                                <div class="modelo-content">
+                                    <i class="fas fa-grip-lines"></i>
+                                    <h4>Treliça Paralela</h4>
+                                    <p>Cobertura plana</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
 
-Comprimento da Telha (m):
-<input type="number" id="compTelha" value="6"><br>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="btn-cancelar">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-calculator"></i> Calcular Materiais
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-Largura útil da Telha (m):
-<input type="number" id="largTelha" value="1"><br>
+            <!-- Meus Projetos Page -->
+            <div id="meus-projetos" class="page">
+                <div class="page-header">
+                    <h2>Meus Projetos</h2>
+                    <button class="btn btn-primary" id="btn-novo-projeto-lista">
+                        <i class="fas fa-plus"></i> Novo Projeto
+                    </button>
+                </div>
 
-Espaçamento entre Terças (m):
-<input type="number" id="espTerca" value="1.5"><br>
+                <div class="section-card">
+                    <div class="filter-bar">
+                        <input type="text" id="search-projetos" placeholder="Buscar por cliente ou número...">
+                        <select id="filter-status">
+                            <option value="">Todos os Status</option>
+                            <option value="Em análise">Em análise</option>
+                            <option value="Aprovado">Aprovado</option>
+                            <option value="Rejeitado">Rejeitado</option>
+                        </select>
+                    </div>
 
-<button onclick="calcularTesoura()">Calcular Estrutura</button>
+                    <div class="table-container">
+                        <table id="tabela-todos-projetos">
+                            <thead>
+                                <tr>
+                                    <th>Nº Proposta</th>
+                                    <th>Cliente</th>
+                                    <th>Data</th>
+                                    <th>Tipo</th>
+                                    <th>Dimensões</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" class="empty-state">Nenhum projeto encontrado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-<div class="resultado" id="resultadoTesoura"></div>
-<canvas id="desenhoTesoura" width="700" height="350"></canvas>
+            <!-- Clientes Page -->
+            <div id="clientes" class="page">
+                <div class="page-header">
+                    <h2>Clientes</h2>
+                </div>
 
-</div>
+                <div class="section-card">
+                    <input type="text" id="search-clientes" placeholder="Buscar cliente...">
+                    
+                    <div class="table-container">
+                        <table id="tabela-clientes">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>CPF/CNPJ</th>
+                                    <th>Telefone</th>
+                                    <th>E-mail</th>
+                                    <th>Projetos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" class="empty-state">Nenhum cliente cadastrado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-</div>
+            <!-- Tabela de Preços Page -->
+            <div id="tabela-precos" class="page">
+                <div class="page-header">
+                    <h2>Tabela de Preços</h2>
+                    <button class="btn btn-primary" id="btn-restaurar-precos">
+                        <i class="fas fa-undo"></i> Restaurar Padrão
+                    </button>
+                </div>
 
+                <div class="section-card">
+                    <h3>Estrutura Metálica</h3>
+                    <div class="price-grid">
+                        <div class="price-item">
+                            <label>Aço Estrutural (R$/kg)</label>
+                            <input type="number" step="0.01" data-price="acoEstrutural">
+                        </div>
+                        <div class="price-item">
+                            <label>Pintura Estrutural (R$/m²)</label>
+                            <input type="number" step="0.01" data-price="pinturaEstrutural">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>Cobertura</h3>
+                    <div class="price-grid">
+                        <div class="price-item">
+                            <label>Telha Metálica (R$/m²)</label>
+                            <input type="number" step="0.01" data-price="telhaMetalica">
+                        </div>
+                        <div class="price-item">
+                            <label>Cumeeira (R$/m)</label>
+                            <input type="number" step="0.01" data-price="cumeeira">
+                        </div>
+                        <div class="price-item">
+                            <label>Parafusos Autobrocantes (R$/un)</label>
+                            <input type="number" step="0.01" data-price="parafusos">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>Drenagem</h3>
+                    <div class="price-grid">
+                        <div class="price-item">
+                            <label>Calha (R$/m)</label>
+                            <input type="number" step="0.01" data-price="calha">
+                        </div>
+                        <div class="price-item">
+                            <label>Rufo (R$/m)</label>
+                            <input type="number" step="0.01" data-price="rufo">
+                        </div>
+                        <div class="price-item">
+                            <label>Condutor Vertical (R$/m)</label>
+                            <input type="number" step="0.01" data-price="condutorVertical">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>Fundação</h3>
+                    <div class="price-grid">
+                        <div class="price-item">
+                            <label>Concreto (R$/m³)</label>
+                            <input type="number" step="0.01" data-price="concreto">
+                        </div>
+                        <div class="price-item">
+                            <label>Aço CA-50 (R$/kg)</label>
+                            <input type="number" step="0.01" data-price="acoFundacao">
+                        </div>
+                        <div class="price-item">
+                            <label>Chumbador (R$/un)</label>
+                            <input type="number" step="0.01" data-price="chumbador">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>Serviços</h3>
+                    <div class="price-grid">
+                        <div class="price-item">
+                            <label>Mão de Obra (R$/m²)</label>
+                            <input type="number" step="0.01" data-price="maoObra">
+                        </div>
+                        <div class="price-item">
+                            <label>Transporte Base (R$)</label>
+                            <input type="number" step="0.01" data-price="transporte">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="btn-salvar-precos">
+                        <i class="fas fa-save"></i> Salvar Alterações
+                    </button>
+                </div>
+            </div>
+
+            <!-- Configurações Page -->
+            <div id="configuracoes" class="page">
+                <div class="page-header">
+                    <h2>Configurações</h2>
+                </div>
+
+                <div class="section-card">
+                    <h3>Dados da Empresa</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nome da Empresa</label>
+                            <input type="text" id="config-nome-empresa">
+                        </div>
+                        <div class="form-group">
+                            <label>CNPJ</label>
+                            <input type="text" id="config-cnpj">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone</label>
+                            <input type="text" id="config-telefone">
+                        </div>
+                        <div class="form-group">
+                            <label>E-mail</label>
+                            <input type="email" id="config-email">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Endereço</label>
+                            <input type="text" id="config-endereco">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>Configurações de Orçamento</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>BDI (%)</label>
+                            <input type="number" step="0.1" id="config-bdi">
+                        </div>
+                        <div class="form-group">
+                            <label>Validade Proposta (dias)</label>
+                            <input type="number" id="config-validade">
+                        </div>
+                        <div class="form-group">
+                            <label>Prazo Execução Padrão (dias)</label>
+                            <input type="number" id="config-prazo">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h3>Backup e Dados</h3>
+                    <div class="backup-actions">
+                        <button class="btn btn-secondary" id="btn-exportar-dados">
+                            <i class="fas fa-download"></i> Exportar Todos os Dados
+                        </button>
+                        <button class="btn btn-secondary" id="btn-importar-dados">
+                            <i class="fas fa-upload"></i> Importar Dados
+                        </button>
+                        <button class="btn btn-danger" id="btn-limpar-dados">
+                            <i class="fas fa-trash"></i> Limpar Todos os Dados
+                        </button>
+                    </div>
+                    <input type="file" id="file-importar" accept=".json" style="display: none;">
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="btn-salvar-config">
+                        <i class="fas fa-save"></i> Salvar Configurações
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Orçamento -->
+    <div id="modal-orcamento" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Orçamento Detalhado</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-orcamento-body">
+                <!-- Conteúdo do orçamento será inserido aqui -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-adicionar-extras">
+                    <i class="fas fa-plus"></i> Adicionar Material Extra
+                </button>
+                <button class="btn btn-secondary" id="btn-editar-status">
+                    <i class="fas fa-tag"></i> Alterar Status
+                </button>
+                <button class="btn btn-primary" id="btn-exportar-pdf">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
+                <button class="btn btn-primary" id="btn-salvar-projeto">
+                    <i class="fas fa-save"></i> Salvar Projeto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Materiais Extras -->
+    <div id="modal-extras" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Adicionar Material/Despesa Extra</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Descrição *</label>
+                    <input type="text" id="extra-descricao" required>
+                </div>
+                <div class="form-group">
+                    <label>Unidade *</label>
+                    <input type="text" id="extra-unidade" placeholder="Ex: un, m, kg, serviço" required>
+                </div>
+                <div class="form-group">
+                    <label>Quantidade *</label>
+                    <input type="number" id="extra-quantidade" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Valor Unitário (R$) *</label>
+                    <input type="number" id="extra-valor" step="0.01" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">Cancelar</button>
+                <button class="btn btn-primary" id="btn-confirmar-extra">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Status -->
+    <div id="modal-status" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Alterar Status do Projeto</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Novo Status</label>
+                    <select id="novo-status">
+                        <option value="Em análise">Em análise</option>
+                        <option value="Aprovado">Aprovado</option>
+                        <option value="Rejeitado">Rejeitado</option>
+                        <option value="Em execução">Em execução</option>
+                        <option value="Concluído">Concluído</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">Cancelar</button>
+                <button class="btn btn-primary" id="btn-confirmar-status">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
 <script>
+// ===== CONFIGURAÇÕES E DADOS GLOBAIS =====
+let currentProject = null;
+let editingProjectId = null;
 
-let alturaGlobal = 0;
+// Preços padrão (2026)
+const defaultPrices = {
+    acoEstrutural: 9.50,
+    pinturaEstrutural: 35.00,
+    telhaMetalica: 48.00,
+    cumeeira: 25.00,
+    parafusos: 0.85,
+    calha: 32.00,
+    rufo: 22.00,
+    condutorVertical: 28.00,
+    concreto: 450.00,
+    acoFundacao: 8.20,
+    chumbador: 15.00,
+    maoObra: 85.00,
+    transporte: 2500.00
+};
 
-function mudarAba(id){
-    document.querySelectorAll(".aba").forEach(a=>a.classList.remove("ativa"));
-    document.getElementById(id).classList.add("ativa");
-}
+// Configurações padrão
+const defaultConfig = {
+    nomeEmpresa: 'SUA EMPRESA LTDA',
+    cnpj: '00.000.000/0001-00',
+    telefone: '(00) 0000-0000',
+    email: 'contato@suaempresa.com.br',
+    endereco: 'Rua Exemplo, 123 - Cidade/UF',
+    bdi: 18,
+    validade: 30,
+    prazo: 60
+};
 
-/* ================== PILARES ================== */
+// ===== INICIALIZAÇÃO =====
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSystem();
+    loadPrices();
+    loadConfig();
+    setupEventListeners();
+    updateDashboard();
+    updateCurrentDate();
+});
 
-function gerar(){
-
-    let largura = parseFloat(document.getElementById("largura").value);
-    let comprimento = parseFloat(document.getElementById("comprimento").value);
-    let altura = parseFloat(document.getElementById("altura").value);
-    let metros = parseFloat(document.getElementById("metros").value);
-    let semMeio = document.getElementById("semMeio").checked;
-
-    if(!largura || !comprimento || !altura || !metros){
-        alert("Preencha todos os campos!");
-        return;
+function initializeSystem() {
+    // Inicializa localStorage se não existir
+    if (!localStorage.getItem('steelcalc_projects')) {
+        localStorage.setItem('steelcalc_projects', JSON.stringify([]));
     }
-
-    alturaGlobal = altura;
-
-    let pl = Math.floor(largura / metros) + 1;
-    let pc = Math.floor(comprimento / metros) + 1;
-
-    desenhar(largura, comprimento, pl, pc, semMeio);
+    if (!localStorage.getItem('steelcalc_prices')) {
+        localStorage.setItem('steelcalc_prices', JSON.stringify(defaultPrices));
+    }
+    if (!localStorage.getItem('steelcalc_config')) {
+        localStorage.setItem('steelcalc_config', JSON.stringify(defaultConfig));
+    }
+    if (!localStorage.getItem('steelcalc_counter')) {
+        localStorage.setItem('steelcalc_counter', '1');
+    }
 }
 
-function desenhar(largura, comprimento, pl, pc, semMeio){
+// ===== NAVEGAÇÃO =====
+function setupEventListeners() {
+    // Navegação
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.dataset.page;
+            navigateTo(page);
+        });
+    });
 
-    let desenho = document.getElementById("desenho");
-    desenho.innerHTML = "";
+    // Formulário de projeto
+    document.getElementById('form-projeto').addEventListener('submit', handleProjectSubmit);
+    document.getElementById('btn-cancelar').addEventListener('click', resetForm);
 
-    let escala = 25;
-    desenho.style.width = (largura * escala) + "px";
-    desenho.style.height = (comprimento * escala) + "px";
-
-    let espacX = (largura * escala) / (pl - 1);
-    let espacY = (comprimento * escala) / (pc - 1);
-
-    for(let i=0;i<pl;i++){
-        for(let j=0;j<pc;j++){
-
-            let borda = (i==0 || i==pl-1 || j==0 || j==pc-1);
-
-            let ponto = document.createElement("div");
-            ponto.classList.add("ponto");
-
-            ponto.style.left = (i*espacX)+"px";
-            ponto.style.top = (j*espacY)+"px";
-
-            if(semMeio){
-                ponto.classList.add(borda ? "ativo" : "inativo");
-            }else{
-                ponto.classList.add("ativo");
-            }
-
-            ponto.onclick = function(){
-                ponto.classList.toggle("ativo");
-                ponto.classList.toggle("inativo");
-                atualizarResultado();
-            }
-
-            desenho.appendChild(ponto);
+    // Inputs de geometria - cálculo automático
+    const geometryInputs = ['largura', 'comprimento', 'espacamento', 'peDireito'];
+    geometryInputs.forEach(name => {
+        const input = document.querySelector(`input[name="${name}"]`);
+        if (input) {
+            input.addEventListener('input', updateCalculatedInfo);
         }
-    }
+    });
 
-    atualizarResultado();
+    // Botões de ação
+    document.getElementById('btn-novo-projeto-lista')?.addEventListener('click', () => navigateTo('novo-projeto'));
+    document.getElementById('btn-salvar-precos')?.addEventListener('click', savePrecos);
+    document.getElementById('btn-restaurar-precos')?.addEventListener('click', restoreDefaultPrices);
+    document.getElementById('btn-salvar-config')?.addEventListener('click', saveConfig);
+
+    // Backup
+    document.getElementById('btn-exportar-dados')?.addEventListener('click', exportData);
+    document.getElementById('btn-importar-dados')?.addEventListener('click', () => {
+        document.getElementById('file-importar').click();
+    });
+    document.getElementById('file-importar')?.addEventListener('change', importData);
+    document.getElementById('btn-limpar-dados')?.addEventListener('click', clearAllData);
+
+    // Modais
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', closeAllModals);
+    });
+
+    // Modal orçamento
+    document.getElementById('btn-salvar-projeto')?.addEventListener('click', saveCurrentProject);
+    document.getElementById('btn-exportar-pdf')?.addEventListener('click', exportToPDF);
+    document.getElementById('btn-adicionar-extras')?.addEventListener('click', openExtrasModal);
+    document.getElementById('btn-editar-status')?.addEventListener('click', openStatusModal);
+
+    // Modal extras
+    document.getElementById('btn-confirmar-extra')?.addEventListener('click', addMaterialExtra);
+
+    // Modal status
+    document.getElementById('btn-confirmar-status')?.addEventListener('click', updateProjectStatus);
+
+    // Filtros
+    document.getElementById('search-projetos')?.addEventListener('input', filterProjects);
+    document.getElementById('filter-status')?.addEventListener('change', filterProjects);
+    document.getElementById('search-clientes')?.addEventListener('input', filterClients);
 }
 
-function atualizarResultado(){
-    let ativos = document.querySelectorAll(".ativo").length;
-    let metrosColunas = ativos * alturaGlobal;
+function navigateTo(page) {
+    // Remove active de todos
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-    document.getElementById("resultado").innerHTML =
-        `Total de Colunas: ${ativos}<br>
-         Metros Totais de Colunas: ${metrosColunas.toFixed(2)} m`;
+    // Ativa o selecionado
+    document.getElementById(page)?.classList.add('active');
+    document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+
+    // Atualiza conteúdo específico da página
+    switch(page) {
+        case 'dashboard':
+            updateDashboard();
+            break;
+        case 'meus-projetos':
+            loadAllProjects();
+            break;
+        case 'clientes':
+            loadClients();
+            break;
+        case 'tabela-precos':
+            loadPrices();
+            break;
+        case 'configuracoes':
+            loadConfig();
+            break;
+    }
 }
 
-/* ================== TESOURA + COBERTURA ================== */
+// ===== UTILITÁRIOS =====
+function updateCurrentDate() {
+    const dateElement = document.getElementById('current-date');
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    dateElement.textContent = now.toLocaleDateString('pt-BR', options);
+}
 
-function calcularTesoura(){
+function formatCurrency(value) {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(value);
+}
 
-    let largura = parseFloat(document.getElementById("largura").value);
-    let comprimento = parseFloat(document.getElementById("comprimento").value);
-    let metros = parseFloat(document.getElementById("metros").value);
-    let inclinacao = parseFloat(document.getElementById("inclinacao").value);
-    let compTelha = parseFloat(document.getElementById("compTelha").value);
-    let largTelha = parseFloat(document.getElementById("largTelha").value);
-    let espTerca = parseFloat(document.getElementById("espTerca").value);
+function formatNumber(value, decimals = 2) {
+    return parseFloat(value).toFixed(decimals);
+}
 
-    if(!largura || !comprimento || !metros){
-        alert("Preencha os dados na aba pilares primeiro!");
-        return;
+function generateProposalNumber() {
+    const counter = parseInt(localStorage.getItem('steelcalc_counter'));
+    const year = new Date().getFullYear();
+    const number = `${year}-${String(counter).padStart(4, '0')}`;
+    localStorage.setItem('steelcalc_counter', (counter + 1).toString());
+    return number;
+}
+
+// ===== CÁLCULOS ESTRUTURAIS =====
+function updateCalculatedInfo() {
+    const largura = parseFloat(document.querySelector('input[name="largura"]').value) || 0;
+    const comprimento = parseFloat(document.querySelector('input[name="comprimento"]').value) || 0;
+    const espacamento = parseFloat(document.querySelector('input[name="espacamento"]').value) || 0;
+    const peDireito = parseFloat(document.querySelector('input[name="peDireito"]').value) || 0;
+
+    if (largura > 0 && comprimento > 0 && espacamento > 0) {
+        const numPilares = Math.ceil(comprimento / espacamento) * 2;
+        const numVaos = Math.ceil(comprimento / espacamento) - 1;
+        const area = largura * comprimento;
+
+        const info = `
+            • Área total: ${area.toFixed(2)} m²<br>
+            • Número de pilares: ${numPilares} unidades<br>
+            • Número de vãos: ${numVaos} vãos<br>
+            • Altura estimada: ${peDireito.toFixed(2)} m
+        `;
+
+        document.getElementById('info-calculada').innerHTML = info;
+    }
+}
+
+function calculateMaterials(formData) {
+    const largura = parseFloat(formData.largura);
+    const comprimento = parseFloat(formData.comprimento);
+    const espacamento = parseFloat(formData.espacamento);
+    const peDireito = parseFloat(formData.peDireito);
+    const inclinacao = parseFloat(formData.inclinacao);
+    const beiral = parseFloat(formData.beiral);
+    const modelo = formData.modeloEstrutural;
+
+    // Área e perímetro
+    const areaBase = largura * comprimento;
+    const perimetro = 2 * (largura + comprimento);
+
+    // Pilares
+    const numPilares = Math.ceil(comprimento / espacamento) * 2;
+    const pesoMedioPilar = 45; // kg/m
+    const pesoPilares = numPilares * peDireito * pesoMedioPilar;
+
+    // Treliças (depende do modelo)
+    let pesoTrelicas = 0;
+    const numTrelicas = Math.ceil(comprimento / espacamento);
+
+    switch(modelo) {
+        case 'duas-aguas':
+            pesoTrelicas = numTrelicas * largura * 12; // 12 kg/m
+            break;
+        case 'uma-agua':
+            pesoTrelicas = numTrelicas * largura * 10;
+            break;
+        case 'arco-trelicado':
+            pesoTrelicas = numTrelicas * largura * 15;
+            break;
+        case 'trelica-paralela':
+            pesoTrelicas = numTrelicas * largura * 11;
+            break;
     }
 
-    /* TESOURAS */
-    let qtdTesouras = Math.floor(comprimento / metros) + 1;
-    let meio = largura / 2;
-    let alturaCumeeira = (inclinacao/100) * meio;
-    let compAgua = Math.sqrt(meio**2 + alturaCumeeira**2);
+    // Terças
+    const espacamentoTercas = 1.5; // metros
+    const numTercas = Math.ceil(largura / espacamentoTercas) * 2;
+    const metrosLinearesTercas = numTercas * comprimento;
+    const pesoTercas = metrosLinearesTercas * 8; // 8 kg/m
 
-    /* TELHAS */
-    let areaTelhado = comprimento * (2 * compAgua);
-    let areaTelha = compTelha * largTelha;
-    let qtdTelhas = Math.ceil(areaTelhado / areaTelha);
+    // Peso total de aço
+    const pesoTotalAco = pesoPilares + pesoTrelicas + pesoTercas;
 
-    /* TERÇAS */
-    let linhasTercas = Math.ceil(compAgua / espTerca) + 1;
-    let totalTercas = linhasTercas * 2;
-    let compTotalTercas = totalTercas * comprimento;
+    // Cobertura
+    const alturaAgua = (largura / 2) * (inclinacao / 100);
+    const comprimentoAgua = Math.sqrt(Math.pow(largura / 2, 2) + Math.pow(alturaAgua, 2));
+    
+    let areaTelhas = 0;
+    if (modelo === 'uma-agua') {
+        areaTelhas = (largura * Math.sqrt(1 + Math.pow(inclinacao / 100, 2))) * comprimento;
+    } else if (modelo === 'arco-trelicado' || modelo === 'trelica-paralela') {
+        areaTelhas = largura * comprimento * 1.1;
+    } else {
+        areaTelhas = comprimentoAgua * 2 * comprimento;
+    }
+    
+    areaTelhas += (beiral * 2 + largura) * beiral * 2; // Beirais
+    areaTelhas *= 1.1; // 10% de sobra
 
-    /* CALHAS */
-    let qtdCalhas = 2;
-    let compCalhas = 2 * comprimento;
+    const metrosCumeeira = comprimento;
+    const parafusos = Math.ceil(areaTelhas * 7); // 7 parafusos/m²
 
-    document.getElementById("resultadoTesoura").innerHTML = `
-        <b>TESOURAS</b><br>
-        Quantidade: ${qtdTesouras}<br>
-        Altura Cumeeira: ${alturaCumeeira.toFixed(2)} m<br><br>
+    // Drenagem
+    const metrosCalha = comprimento * 2;
+    const metrosRufo = perimetro * 0.3;
+    const condutoresVerticais = numPilares * 0.5 * peDireito;
 
-        <b>TELHAS</b><br>
-        Área Total: ${areaTelhado.toFixed(2)} m²<br>
-        Quantidade: ${qtdTelhas}<br><br>
+    // Fundação
+    const volumeConcretoPorSapata = 0.5; // m³
+    const volumeTotalConcreto = numPilares * volumeConcretoPorSapata;
+    const acoFundacao = volumeTotalConcreto * 80; // 80 kg/m³
 
-        <b>TERÇAS</b><br>
-        Linhas por água: ${linhasTercas}<br>
-        Total de peças: ${totalTercas}<br>
-        Comprimento total: ${compTotalTercas.toFixed(2)} m<br><br>
+    // Fixações
+    const chapasBase = numPilares;
+    const chumbadores = numPilares * 4;
 
-        <b>CALHAS</b><br>
-        Quantidade: ${qtdCalhas}<br>
-        Comprimento total: ${compCalhas.toFixed(2)} m
+    // Mão de obra e acabamento
+    const areaServicos = areaBase;
+
+    return {
+        geometria: {
+            largura,
+            comprimento,
+            peDireito,
+            espacamento,
+            inclinacao,
+            beiral,
+            areaBase: areaBase.toFixed(2),
+            modelo
+        },
+        estrutura: {
+            numPilares,
+            pesoPilares: pesoPilares.toFixed(2),
+            numTrelicas,
+            pesoTrelicas: pesoTrelicas.toFixed(2),
+            metrosLinearesTercas: metrosLinearesTercas.toFixed(2),
+            pesoTercas: pesoTercas.toFixed(2),
+            pesoTotalAco: pesoTotalAco.toFixed(2)
+        },
+        cobertura: {
+            areaTelhas: areaTelhas.toFixed(2),
+            metrosCumeeira: metrosCumeeira.toFixed(2),
+            parafusos
+        },
+        drenagem: {
+            metrosCalha: metrosCalha.toFixed(2),
+            metrosRufo: metrosRufo.toFixed(2),
+            condutoresVerticais: condutoresVerticais.toFixed(2)
+        },
+        fundacao: {
+            volumeConcreto: volumeTotalConcreto.toFixed(2),
+            acoFundacao: acoFundacao.toFixed(2),
+            numSapatas: numPilares,
+            chumbadores
+        },
+        servicos: {
+            areaServicos: areaServicos.toFixed(2)
+        }
+    };
+}
+
+function calculateBudget(materials) {
+    const prices = JSON.parse(localStorage.getItem('steelcalc_prices'));
+    const config = JSON.parse(localStorage.getItem('steelcalc_config'));
+
+    const items = [];
+
+    // Estrutura Metálica
+    items.push({
+        categoria: 'ESTRUTURA METÁLICA',
+        descricao: 'Pilares metálicos',
+        unidade: 'kg',
+        quantidade: parseFloat(materials.estrutura.pesoPilares),
+        valorUnitario: prices.acoEstrutural,
+        valorTotal: parseFloat(materials.estrutura.pesoPilares) * prices.acoEstrutural
+    });
+
+    items.push({
+        categoria: 'ESTRUTURA METÁLICA',
+        descricao: 'Treliças',
+        unidade: 'kg',
+        quantidade: parseFloat(materials.estrutura.pesoTrelicas),
+        valorUnitario: prices.acoEstrutural,
+        valorTotal: parseFloat(materials.estrutura.pesoTrelicas) * prices.acoEstrutural
+    });
+
+    items.push({
+        categoria: 'ESTRUTURA METÁLICA',
+        descricao: 'Terças',
+        unidade: 'kg',
+        quantidade: parseFloat(materials.estrutura.pesoTercas),
+        valorUnitario: prices.acoEstrutural,
+        valorTotal: parseFloat(materials.estrutura.pesoTercas) * prices.acoEstrutural
+    });
+
+    items.push({
+        categoria: 'ESTRUTURA METÁLICA',
+        descricao: 'Pintura estrutural',
+        unidade: 'm²',
+        quantidade: parseFloat(materials.geometria.areaBase) * 0.5,
+        valorUnitario: prices.pinturaEstrutural,
+        valorTotal: parseFloat(materials.geometria.areaBase) * 0.5 * prices.pinturaEstrutural
+    });
+
+    // Cobertura
+    items.push({
+        categoria: 'COBERTURA',
+        descricao: 'Telhas metálicas',
+        unidade: 'm²',
+        quantidade: parseFloat(materials.cobertura.areaTelhas),
+        valorUnitario: prices.telhaMetalica,
+        valorTotal: parseFloat(materials.cobertura.areaTelhas) * prices.telhaMetalica
+    });
+
+    items.push({
+        categoria: 'COBERTURA',
+        descricao: 'Cumeeiras',
+        unidade: 'm',
+        quantidade: parseFloat(materials.cobertura.metrosCumeeira),
+        valorUnitario: prices.cumeeira,
+        valorTotal: parseFloat(materials.cobertura.metrosCumeeira) * prices.cumeeira
+    });
+
+    items.push({
+        categoria: 'COBERTURA',
+        descricao: 'Parafusos autobrocantes',
+        unidade: 'un',
+        quantidade: materials.cobertura.parafusos,
+        valorUnitario: prices.parafusos,
+        valorTotal: materials.cobertura.parafusos * prices.parafusos
+    });
+
+    // Drenagem
+    items.push({
+        categoria: 'DRENAGEM',
+        descricao: 'Calhas',
+        unidade: 'm',
+        quantidade: parseFloat(materials.drenagem.metrosCalha),
+        valorUnitario: prices.calha,
+        valorTotal: parseFloat(materials.drenagem.metrosCalha) * prices.calha
+    });
+
+    items.push({
+        categoria: 'DRENAGEM',
+        descricao: 'Rufos',
+        unidade: 'm',
+        quantidade: parseFloat(materials.drenagem.metrosRufo),
+        valorUnitario: prices.rufo,
+        valorTotal: parseFloat(materials.drenagem.metrosRufo) * prices.rufo
+    });
+
+    items.push({
+        categoria: 'DRENAGEM',
+        descricao: 'Condutores verticais',
+        unidade: 'm',
+        quantidade: parseFloat(materials.drenagem.condutoresVerticais),
+        valorUnitario: prices.condutorVertical,
+        valorTotal: parseFloat(materials.drenagem.condutoresVerticais) * prices.condutorVertical
+    });
+
+    // Fundação
+    items.push({
+        categoria: 'FUNDAÇÃO',
+        descricao: 'Concreto FCK 25 MPa',
+        unidade: 'm³',
+        quantidade: parseFloat(materials.fundacao.volumeConcreto),
+        valorUnitario: prices.concreto,
+        valorTotal: parseFloat(materials.fundacao.volumeConcreto) * prices.concreto
+    });
+
+    items.push({
+        categoria: 'FUNDAÇÃO',
+        descricao: 'Aço CA-50',
+        unidade: 'kg',
+        quantidade: parseFloat(materials.fundacao.acoFundacao),
+        valorUnitario: prices.acoFundacao,
+        valorTotal: parseFloat(materials.fundacao.acoFundacao) * prices.acoFundacao
+    });
+
+    items.push({
+        categoria: 'FUNDAÇÃO',
+        descricao: 'Chumbadores',
+        unidade: 'un',
+        quantidade: materials.fundacao.chumbadores,
+        valorUnitario: prices.chumbador,
+        valorTotal: materials.fundacao.chumbadores * prices.chumbador
+    });
+
+    // Serviços
+    items.push({
+        categoria: 'SERVIÇOS',
+        descricao: 'Mão de obra montagem',
+        unidade: 'm²',
+        quantidade: parseFloat(materials.servicos.areaServicos),
+        valorUnitario: prices.maoObra,
+        valorTotal: parseFloat(materials.servicos.areaServicos) * prices.maoObra
+    });
+
+    items.push({
+        categoria: 'SERVIÇOS',
+        descricao: 'Transporte',
+        unidade: 'vb',
+        quantidade: 1,
+        valorUnitario: prices.transporte,
+        valorTotal: prices.transporte
+    });
+
+    const subtotal = items.reduce((sum, item) => sum + item.valorTotal, 0);
+    const bdi = subtotal * (config.bdi / 100);
+    const total = subtotal + bdi;
+
+    return {
+        items,
+        subtotal,
+        bdi,
+        bdiPercentual: config.bdi,
+        total,
+        extras: []
+    };
+}
+
+// ===== FORMULÁRIO DE PROJETO =====
+function handleProjectSubmit(e) {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+
+    // Calcula materiais
+    const materials = calculateMaterials(data);
+
+    // Calcula orçamento
+    const budget = calculateBudget(materials);
+
+    // Cria projeto
+    currentProject = {
+        id: editingProjectId || Date.now(),
+        numeroProposta: editingProjectId ? 
+            getProjects().find(p => p.id === editingProjectId).numeroProposta : 
+            generateProposalNumber(),
+        data: new Date().toISOString(),
+        status: 'Em análise',
+        cliente: {
+            nome: data.nomeCliente,
+            cpf: data.cpfCliente,
+            telefone: data.telefoneCliente,
+            email: data.emailCliente || '',
+            endereco: data.enderecoCliente || '',
+            observacoes: data.observacoesCliente || ''
+        },
+        geometria: materials.geometria,
+        materiais: materials,
+        orcamento: budget
+    };
+
+    // Mostra modal com orçamento
+    showBudgetModal();
+}
+
+function resetForm() {
+    document.getElementById('form-projeto').reset();
+    document.getElementById('info-calculada').innerHTML = 'Preencha os campos acima para ver os cálculos automáticos';
+    currentProject = null;
+    editingProjectId = null;
+}
+
+// ===== MODAL ORÇAMENTO =====
+function showBudgetModal() {
+    const modal = document.getElementById('modal-orcamento');
+    const body = document.getElementById('modal-orcamento-body');
+
+    body.innerHTML = generateBudgetHTML();
+
+    modal.classList.add('active');
+}
+
+function generateBudgetHTML() {
+    const config = JSON.parse(localStorage.getItem('steelcalc_config'));
+    const project = currentProject;
+
+    const modeloNomes = {
+        'duas-aguas': 'Duas Águas',
+        'uma-agua': 'Uma Água',
+        'arco-trelicado': 'Arco Treliçado',
+        'trelica-paralela': 'Treliça Paralela'
+    };
+
+    let html = `
+        <div class="orcamento-container">
+            <div class="orcamento-header">
+                <h1>${config.nomeEmpresa}</h1>
+                <p>${config.cnpj} | ${config.telefone} | ${config.email}</p>
+                <p>${config.endereco}</p>
+                <hr style="border: 2px solid var(--secondary-color); margin: 1rem 0;">
+                <h2 style="color: var(--secondary-color);">ORÇAMENTO COMERCIAL</h2>
+                <p style="margin-top: 1rem;">
+                    <strong>Proposta Nº:</strong> ${project.numeroProposta} | 
+                    <strong>Data:</strong> ${new Date(project.data).toLocaleDateString('pt-BR')} | 
+                    <strong>Validade:</strong> ${config.validade} dias
+                </p>
+            </div>
+
+            <div class="orcamento-info">
+                <div class="info-section">
+                    <h3>DADOS DO CLIENTE</h3>
+                    <p><strong>Nome:</strong> ${project.cliente.nome}</p>
+                    <p><strong>CPF/CNPJ:</strong> ${project.cliente.cpf}</p>
+                    <p><strong>Telefone:</strong> ${project.cliente.telefone}</p>
+                    ${project.cliente.email ? `<p><strong>E-mail:</strong> ${project.cliente.email}</p>` : ''}
+                    ${project.cliente.endereco ? `<p><strong>Endereço:</strong> ${project.cliente.endereco}</p>` : ''}
+                </div>
+
+                <div class="info-section">
+                    <h3>ESPECIFICAÇÕES DO PROJETO</h3>
+                    <p><strong>Tipo:</strong> Galpão ${modeloNomes[project.geometria.modelo]}</p>
+                    <p><strong>Dimensões:</strong> ${project.geometria.largura}m x ${project.geometria.comprimento}m</p>
+                    <p><strong>Pé-direito:</strong> ${project.geometria.peDireito}m</p>
+                    <p><strong>Área total:</strong> ${project.geometria.areaBase} m²</p>
+                    <p><strong>Inclinação:</strong> ${project.geometria.inclinacao}%</p>
+                </div>
+            </div>
+
+            <div class="orcamento-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ITEM</th>
+                            <th>DESCRIÇÃO</th>
+                            <th>UNID.</th>
+                            <th>QUANT.</th>
+                            <th>VALOR UNIT.</th>
+                            <th>VALOR TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
     `;
 
-    desenharTesoura(largura, alturaCumeeira);
+    // Agrupa itens por categoria
+    const categorias = {};
+    project.orcamento.items.forEach(item => {
+        if (!categorias[item.categoria]) {
+            categorias[item.categoria] = [];
+        }
+        categorias[item.categoria].push(item);
+    });
+
+    // Gera linhas
+    let itemNum = 1;
+    Object.keys(categorias).forEach(categoria => {
+        html += `<tr class="category-header">
+            <td colspan="6">${itemNum}.0 ${categoria}</td>
+        </tr>`;
+
+        let subItemNum = 1;
+        categorias[categoria].forEach(item => {
+            html += `
+                <tr>
+                    <td>${itemNum}.${subItemNum}</td>
+                    <td>${item.descricao}</td>
+                    <td>${item.unidade}</td>
+                    <td>${formatNumber(item.quantidade)}</td>
+                    <td class="text-right">${formatCurrency(item.valorUnitario)}</td>
+                    <td class="text-right">${formatCurrency(item.valorTotal)}</td>
+                </tr>
+            `;
+            subItemNum++;
+        });
+
+        itemNum++;
+    });
+
+    // Materiais extras
+    if (project.orcamento.extras && project.orcamento.extras.length > 0) {
+        html += `<tr class="category-header">
+            <td colspan="6">${itemNum}.0 MATERIAIS E DESPESAS EXTRAS</td>
+        </tr>`;
+
+        let subItemNum = 1;
+        project.orcamento.extras.forEach(extra => {
+            html += `
+                <tr>
+                    <td>${itemNum}.${subItemNum}</td>
+                    <td>${extra.descricao}</td>
+                    <td>${extra.unidade}</td>
+                    <td>${formatNumber(extra.quantidade)}</td>
+                    <td class="text-right">${formatCurrency(extra.valorUnitario)}</td>
+                    <td class="text-right">${formatCurrency(extra.valorTotal)}</td>
+                </tr>
+            `;
+            subItemNum++;
+        });
+    }
+
+    // Totais
+    const extrasTotal = project.orcamento.extras ? 
+        project.orcamento.extras.reduce((sum, e) => sum + e.valorTotal, 0) : 0;
+    const subtotalComExtras = project.orcamento.subtotal + extrasTotal;
+    const bdi = subtotalComExtras * (project.orcamento.bdiPercentual / 100);
+    const totalFinal = subtotalComExtras + bdi;
+
+    html += `
+                        <tr class="subtotal-row">
+                            <td colspan="5" class="text-right"><strong>SUBTOTAL</strong></td>
+                            <td class="text-right"><strong>${formatCurrency(subtotalComExtras)}</strong></td>
+                        </tr>
+                        <tr class="subtotal-row">
+                            <td colspan="5" class="text-right"><strong>BDI (${project.orcamento.bdiPercentual}%)</strong></td>
+                            <td class="text-right"><strong>${formatCurrency(bdi)}</strong></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="5" class="text-right"><strong>VALOR TOTAL</strong></td>
+                            <td class="text-right"><strong>${formatCurrency(totalFinal)}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 2rem; padding: 1rem; background: var(--bg-light); border-radius: 4px;">
+                    <p><strong>Prazo de Execução:</strong> ${config.prazo} dias corridos</p>
+                    <p><strong>Condições de Pagamento:</strong> A combinar</p>
+                    <p><strong>Observações:</strong> ${project.cliente.observacoes || 'Preços sujeitos a alteração sem aviso prévio.'}</p>
+                </div>
+
+                <div style="margin-top: 2rem; text-align: center;">
+                    <p>_________________________________</p>
+                    <p><strong>Assinatura do Responsável</strong></p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    return html;
 }
 
-function desenharTesoura(largura, altura){
+function saveCurrentProject() {
+    if (!currentProject) return;
 
-    let canvas = document.getElementById("desenhoTesoura");
-    let ctx = canvas.getContext("2d");
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const projects = getProjects();
+    const existingIndex = projects.findIndex(p => p.id === currentProject.id);
 
-    let escala = 35;
-    let base = largura * escala;
-    let alt = altura * escala;
+    if (existingIndex >= 0) {
+        projects[existingIndex] = currentProject;
+    } else {
+        projects.push(currentProject);
+    }
 
-    let inicioX = (canvas.width - base)/2;
-    let baseY = canvas.height - 50;
+    localStorage.setItem('steelcalc_projects', JSON.stringify(projects));
 
-    ctx.beginPath();
-    ctx.moveTo(inicioX, baseY);
-    ctx.lineTo(inicioX + base/2, baseY - alt);
-    ctx.lineTo(inicioX + base, baseY);
-    ctx.closePath();
-    ctx.stroke();
+    alert('Projeto salvo com sucesso!');
+    closeAllModals();
+    resetForm();
+    navigateTo('meus-projetos');
 }
 
-</script>
+// ===== MATERIAIS EXTRAS =====
+function openExtrasModal() {
+    const modal = document.getElementById('modal-extras');
+    modal.classList.add('active');
 
+    // Limpa campos
+    document.getElementById('extra-descricao').value = '';
+    document.getElementById('extra-unidade').value = '';
+    document.getElementById('extra-quantidade').value = '';
+    document.getElementById('extra-valor').value = '';
+}
+
+function addMaterialExtra() {
+    const descricao = document.getElementById('extra-descricao').value;
+    const unidade = document.getElementById('extra-unidade').value;
+    const quantidade = parseFloat(document.getElementById('extra-quantidade').value);
+    const valorUnitario = parseFloat(document.getElementById('extra-valor').value);
+
+    if (!descricao || !unidade || !quantidade || !valorUnitario) {
+        alert('Preencha todos os campos!');
+        return;
+    }
+
+    const extra = {
+        descricao,
+        unidade,
+        quantidade,
+        valorUnitario,
+        valorTotal: quantidade * valorUnitario
+    };
+
+    if (!currentProject.orcamento.extras) {
+        currentProject.orcamento.extras = [];
+    }
+
+    currentProject.orcamento.extras.push(extra);
+
+    // Recalcula totais
+    const extrasTotal = currentProject.orcamento.extras.reduce((sum, e) => sum + e.valorTotal, 0);
+    const subtotalComExtras = currentProject.orcamento.subtotal + extrasTotal;
+    const bdi = subtotalComExtras * (currentProject.orcamento.bdiPercentual / 100);
+    currentProject.orcamento.total = subtotalComExtras + bdi;
+
+    // Fecha modal extras e atualiza orçamento
+    document.getElementById('modal-extras').classList.remove('active');
+    showBudgetModal();
+}
+
+// ===== STATUS =====
+function openStatusModal() {
+    const modal = document.getElementById('modal-status');
+    document.getElementById('novo-status').value = currentProject.status;
+    modal.classList.add('active');
+}
+
+function updateProjectStatus() {
+    const novoStatus = document.getElementById('novo-status').value;
+    currentProject.status = novoStatus;
+
+    document.getElementById('modal-status').classList.remove('active');
+    alert('Status atualizado!');
+}
+
+// ===== EXPORTAÇÃO PDF =====
+async function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    
+    try {
+        const element = document.querySelector('.orcamento-container');
+        
+        // Captura como imagem
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            logging: false
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        const imgWidth = 210;
+        const pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+
+        pdf.save(`Orcamento_${currentProject.numeroProposta}.pdf`);
+    } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        alert('Erro ao gerar PDF. Tente novamente.');
+    }
+}
+
+// ===== GESTÃO DE PROJETOS =====
+function getProjects() {
+    return JSON.parse(localStorage.getItem('steelcalc_projects')) || [];
+}
+
+function loadAllProjects() {
+    const projects = getProjects();
+    const tbody = document.querySelector('#tabela-todos-projetos tbody');
+
+    if (projects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhum projeto encontrado</td></tr>';
+        return;
+    }
+
+    const modeloNomes = {
+        'duas-aguas': 'Duas Águas',
+        'uma-agua': 'Uma Água',
+        'arco-trelicado': 'Arco Treliçado',
+        'trelica-paralela': 'Treliça Paralela'
+    };
+
+    tbody.innerHTML = projects.map(project => {
+        const extrasTotal = project.orcamento.extras ? 
+            project.orcamento.extras.reduce((sum, e) => sum + e.valorTotal, 0) : 0;
+        const subtotalComExtras = project.orcamento.subtotal + extrasTotal;
+        const bdi = subtotalComExtras * (project.orcamento.bdiPercentual / 100);
+        const totalFinal = subtotalComExtras + bdi;
+
+        const statusClass = project.status === 'Aprovado' ? 'success' : 
+                           project.status === 'Rejeitado' ? 'danger' : 'warning';
+
+        return `
+            <tr>
+                <td>${project.numeroProposta}</td>
+                <td>${project.cliente.nome}</td>
+                <td>${new Date(project.data).toLocaleDateString('pt-BR')}</td>
+                <td>${modeloNomes[project.geometria.modelo]}</td>
+                <td>${project.geometria.largura}m x ${project.geometria.comprimento}m</td>
+                <td>${formatCurrency(totalFinal)}</td>
+                <td><span class="badge badge-${statusClass}">${project.status}</span></td>
+                <td class="action-buttons">
+                    <button class="action-btn view" onclick="viewProject(${project.id})" title="Visualizar">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn edit" onclick="editProject(${project.id})" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="deleteProject(${project.id})" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function viewProject(id) {
+    const projects = getProjects();
+    currentProject = projects.find(p => p.id === id);
+    if (currentProject) {
+        showBudgetModal();
+    }
+}
+
+function editProject(id) {
+    const projects = getProjects();
+    const project = projects.find(p => p.id === id);
+    
+    if (!project) return;
+
+    editingProjectId = id;
+    currentProject = project;
+
+    // Preenche formulário
+    document.querySelector('input[name="nomeCliente"]').value = project.cliente.nome;
+    document.querySelector('input[name="cpfCliente"]').value = project.cliente.cpf;
+    document.querySelector('input[name="telefoneCliente"]').value = project.cliente.telefone;
+    document.querySelector('input[name="emailCliente"]').value = project.cliente.email || '';
+    document.querySelector('input[name="enderecoCliente"]').value = project.cliente.endereco || '';
+    document.querySelector('textarea[name="observacoesCliente"]').value = project.cliente.observacoes || '';
+
+    document.querySelector('input[name="largura"]').value = project.geometria.largura;
+    document.querySelector('input[name="comprimento"]').value = project.geometria.comprimento;
+    document.querySelector('input[name="peDireito"]').value = project.geometria.peDireito;
+    document.querySelector('input[name="espacamento"]').value = project.geometria.espacamento;
+    document.querySelector('input[name="inclinacao"]').value = project.geometria.inclinacao;
+    document.querySelector('input[name="beiral"]').value = project.geometria.beiral;
+
+    document.querySelector(`input[name="modeloEstrutural"][value="${project.geometria.modelo}"]`).checked = true;
+
+    navigateTo('novo-projeto');
+    updateCalculatedInfo();
+}
+
+function deleteProject(id) {
+    if (!confirm('Tem certeza que deseja excluir este projeto?')) return;
+
+    let projects = getProjects();
+    projects = projects.filter(p => p.id !== id);
+    localStorage.setItem('steelcalc_projects', JSON.stringify(projects));
+
+    loadAllProjects();
+    updateDashboard();
+}
+
+function filterProjects() {
+    const searchTerm = document.getElementById('search-projetos').value.toLowerCase();
+    const statusFilter = document.getElementById('filter-status').value;
+
+    const rows = document.querySelectorAll('#tabela-todos-projetos tbody tr');
+
+    rows.forEach(row => {
+        if (row.querySelector('.empty-state')) return;
+
+        const text = row.textContent.toLowerCase();
+        const status = row.querySelector('.badge')?.textContent || '';
+
+        const matchesSearch = text.includes(searchTerm);
+        const matchesStatus = !statusFilter || status === statusFilter;
+
+        row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+    });
+}
+
+// ===== CLIENTES =====
+function loadClients() {
+    const projects = getProjects();
+    const tbody = document.querySelector('#tabela-clientes tbody');
+
+    // Agrupa por cliente
+    const clientesMap = {};
+    projects.forEach(project => {
+        const key = project.cliente.cpf;
+        if (!clientesMap[key]) {
+            clientesMap[key] = {
+                ...project.cliente,
+                projetos: 0
+            };
+        }
+        clientesMap[key].projetos++;
+    });
+
+    const clientes = Object.values(clientesMap);
+
+    if (clientes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum cliente cadastrado</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = clientes.map(cliente => `
+        <tr>
+            <td>${cliente.nome}</td>
+            <td>${cliente.cpf}</td>
+            <td>${cliente.telefone}</td>
+            <td>${cliente.email || '-'}</td>
+            <td>${cliente.projetos}</td>
+        </tr>
+    `).join('');
+}
+
+function filterClients() {
+    const searchTerm = document.getElementById('search-clientes').value.toLowerCase();
+    const rows = document.querySelectorAll('#tabela-clientes tbody tr');
+
+    rows.forEach(row => {
+        if (row.querySelector('.empty-state')) return;
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+}
+
+// ===== DASHBOARD =====
+function updateDashboard() {
+    const projects = getProjects();
+
+    // Total de projetos
+    document.getElementById('total-projetos').textContent = projects.length;
+
+    // Clientes únicos
+    const clientesUnicos = new Set(projects.map(p => p.cliente.cpf));
+    document.getElementById('total-clientes').textContent = clientesUnicos.size;
+
+    // Projetos do mês
+    const mesAtual = new Date().getMonth();
+    const anoAtual = new Date().getFullYear();
+    const projetosMes = projects.filter(p => {
+        const data = new Date(p.data);
+        return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+    });
+    document.getElementById('projetos-mes').textContent = projetosMes.length;
+
+    // Valor total
+    let valorTotal = 0;
+    projects.forEach(project => {
+        const extrasTotal = project.orcamento.extras ? 
+            project.orcamento.extras.reduce((sum, e) => sum + e.valorTotal, 0) : 0;
+        const subtotalComExtras = project.orcamento.subtotal + extrasTotal;
+        const bdi = subtotalComExtras * (project.orcamento.bdiPercentual / 100);
+        valorTotal += subtotalComExtras + bdi;
+    });
+    document.getElementById('valor-total').textContent = formatCurrency(valorTotal);
+
+    // Tabela de projetos recentes
+    loadRecentProjects();
+}
+
+function loadRecentProjects() {
+    const projects = getProjects().slice(-5).reverse();
+    const tbody = document.querySelector('#tabela-projetos-recentes tbody');
+
+    if (projects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum projeto cadastrado ainda</td></tr>';
+        return;
+    }
+
+    const modeloNomes = {
+        'duas-aguas': 'Duas Águas',
+        'uma-agua': 'Uma Água',
+        'arco-trelicado': 'Arco Treliçado',
+        'trelica-paralela': 'Treliça Paralela'
+    };
+
+    tbody.innerHTML = projects.map(project => {
+        const extrasTotal = project.orcamento.extras ? 
+            project.orcamento.extras.reduce((sum, e) => sum + e.valorTotal, 0) : 0;
+        const subtotalComExtras = project.orcamento.subtotal + extrasTotal;
+        const bdi = subtotalComExtras * (project.orcamento.bdiPercentual / 100);
+        const totalFinal = subtotalComExtras + bdi;
+
+        const statusClass = project.status === 'Aprovado' ? 'success' : 
+                           project.status === 'Rejeitado' ? 'danger' : 'warning';
+
+        return `
+            <tr>
+                <td>${project.numeroProposta}</td>
+                <td>${project.cliente.nome}</td>
+                <td>${new Date(project.data).toLocaleDateString('pt-BR')}</td>
+                <td>${modeloNomes[project.geometria.modelo]}</td>
+                <td>${formatCurrency(totalFinal)}</td>
+                <td><span class="badge badge-${statusClass}">${project.status}</span></td>
+                <td class="action-buttons">
+                    <button class="action-btn view" onclick="viewProject(${project.id})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ===== PREÇOS =====
+function loadPrices() {
+    const prices = JSON.parse(localStorage.getItem('steelcalc_prices'));
+
+    Object.keys(prices).forEach(key => {
+        const input = document.querySelector(`[data-price="${key}"]`);
+        if (input) {
+            input.value = prices[key];
+        }
+    });
+}
+
+function savePrecos() {
+    const prices = {};
+
+    document.querySelectorAll('[data-price]').forEach(input => {
+        const key = input.dataset.price;
+        prices[key] = parseFloat(input.value) || 0;
+    });
+
+    localStorage.setItem('steelcalc_prices', JSON.stringify(prices));
+    alert('Preços salvos com sucesso!');
+}
+
+function restoreDefaultPrices() {
+    if (!confirm('Deseja restaurar os preços padrão? As alterações atuais serão perdidas.')) return;
+
+    localStorage.setItem('steelcalc_prices', JSON.stringify(defaultPrices));
+    loadPrices();
+    alert('Preços restaurados!');
+}
+
+// ===== CONFIGURAÇÕES =====
+function loadConfig() {
+    const config = JSON.parse(localStorage.getItem('steelcalc_config'));
+
+    document.getElementById('config-nome-empresa').value = config.nomeEmpresa;
+    document.getElementById('config-cnpj').value = config.cnpj;
+    document.getElementById('config-telefone').value = config.telefone;
+    document.getElementById('config-email').value = config.email;
+    document.getElementById('config-endereco').value = config.endereco;
+    document.getElementById('config-bdi').value = config.bdi;
+    document.getElementById('config-validade').value = config.validade;
+    document.getElementById('config-prazo').value = config.prazo;
+}
+
+function saveConfig() {
+    const config = {
+        nomeEmpresa: document.getElementById('config-nome-empresa').value,
+        cnpj: document.getElementById('config-cnpj').value,
+        telefone: document.getElementById('config-telefone').value,
+        email: document.getElementById('config-email').value,
+        endereco: document.getElementById('config-endereco').value,
+        bdi: parseFloat(document.getElementById('config-bdi').value),
+        validade: parseInt(document.getElementById('config-validade').value),
+        prazo: parseInt(document.getElementById('config-prazo').value)
+    };
+
+    localStorage.setItem('steelcalc_config', JSON.stringify(config));
+    alert('Configurações salvas com sucesso!');
+}
+
+// ===== BACKUP =====
+function exportData() {
+    const data = {
+        projects: getProjects(),
+        prices: JSON.parse(localStorage.getItem('steelcalc_prices')),
+        config: JSON.parse(localStorage.getItem('steelcalc_config')),
+        counter: localStorage.getItem('steelcalc_counter'),
+        exportDate: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `steelcalc_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+}
+
+function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            const data = JSON.parse(event.target.result);
+
+            if (confirm('Importar dados? Os dados atuais serão substituídos!')) {
+                localStorage.setItem('steelcalc_projects', JSON.stringify(data.projects));
+                localStorage.setItem('steelcalc_prices', JSON.stringify(data.prices));
+                localStorage.setItem('steelcalc_config', JSON.stringify(data.config));
+                localStorage.setItem('steelcalc_counter', data.counter);
+
+                alert('Dados importados com sucesso!');
+                location.reload();
+            }
+        } catch (error) {
+            alert('Erro ao importar dados. Arquivo inválido.');
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function clearAllData() {
+    if (!confirm('ATENÇÃO! Isso irá apagar TODOS os dados. Deseja continuar?')) return;
+    if (!confirm('Tem certeza? Esta ação não pode ser desfeita!')) return;
+
+    localStorage.clear();
+    alert('Todos os dados foram apagados.');
+    location.reload();
+}
+
+// ===== MODAIS =====
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.classList.remove('active');
+    });
+}
+
+// Fecha modal ao clicar fora
+window.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal')) {
+        closeAllModals();
+    }
+});
+
+</script>
 </body>
 </html>
-
-
-</script>
-
-</body>
-</html>
-
