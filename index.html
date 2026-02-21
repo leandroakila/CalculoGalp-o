@@ -2,44 +2,33 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>SteelCalc Pro - 3D & Treliças Paralelas</title>
+    <title>SteelCalc Pro - 3D & Estruturas Completas</title>
     <style>
         :root { --primary: #1f2d3d; --accent: #e67e22; --bg: #f2f4f8; }
         body { font-family: 'Segoe UI', Arial; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { display: flex; gap: 20px; max-width: 1600px; margin: auto; align-items: flex-start; }
-        
-        /* Painel Lateral */
         .painel { width: 380px; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; position: sticky; top: 20px; }
-        .tab-nav { display: flex; background: var(--primary); }
-        .tab-btn { flex: 1; padding: 12px; border: none; background: none; color: #fff; cursor: pointer; font-size: 10px; font-weight: bold; opacity: 0.6; }
+        .tab-nav { display: flex; background: var(--primary); flex-wrap: wrap; }
+        .tab-btn { flex: 1; min-width: 80px; padding: 12px 5px; border: none; background: none; color: #fff; cursor: pointer; font-size: 9px; font-weight: bold; opacity: 0.6; }
         .tab-btn.active { opacity: 1; border-bottom: 3px solid var(--accent); }
         .tab-content { display: none; padding: 20px; }
         .tab-content.active { display: block; }
-
         label { font-size: 11px; font-weight: bold; display: block; margin-top: 12px; color: #666; text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         .btn-acao { background: #e74c3c; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; margin-top: 15px; font-weight: bold; }
-
-        /* Área de Visualização */
-        .visualizacao { flex: 1; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 85vh; }
+        .visualizacao { flex: 1; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 85vh; text-align: center; }
         #desenhoPlanta { position: relative; border: 1px solid #ccc; background: #fafafa; margin: 40px auto; transition: transform 0.5s; }
-        
-        /* Efeito 3D para a planta se desejar */
         .visao-3d { transform: rotateX(45deg) rotateZ(-30deg); box-shadow: 20px 20px 50px rgba(0,0,0,0.2); }
-
         .ponto { width: 16px; height: 16px; position: absolute; transform: translate(-50%,-50%); cursor: pointer; border: 1px solid #000; border-radius: 2px; z-index: 5; }
         .ativo { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
         .inativo { background: #dfe6e9; border: 1px dashed #999; opacity: 0.4; }
-
-        .cota-h, .cota-v { position: absolute; font-size: 10px; font-weight: bold; color: #555; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .cota-h { border-left: 1px solid #999; border-right: 1px solid #999; border-bottom: 1px solid #999; bottom: -25px; height: 8px; }
-        .cota-v { border-top: 1px solid #999; border-bottom: 1px solid #999; border-left: 1px solid #999; left: -45px; width: 8px; }
-
-        canvas { background: #1a1a1a; border-radius: 8px; max-width: 100%; border: 4px solid #333; }
-
-        .painel-consumo { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
+        canvas { background: #1a1a1a; border-radius: 8px; max-width: 100%; border: 4px solid #333; display: block; margin: 20px auto; transition: transform 0.5s; }
+        .painel-consumo { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; text-align: left; }
         .grade-consumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
         .card-consumo { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid var(--accent); }
+        .tabela-orcamento { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; text-align: left; }
+        .tabela-orcamento th, .tabela-orcamento td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
+        .tabela-orcamento th { background: #f8f9fa; color: #666; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -49,8 +38,10 @@
         <div class="tab-nav">
             <button class="tab-btn active" onclick="switchTab(0)">1. GEOMETRIA</button>
             <button class="tab-btn" onclick="switchTab(1)">2. ESTRUTURA</button>
-            <button class="tab-btn" onclick="switchTab(2)">3. PREÇOS</button>
-            <button class="tab-btn" onclick="switchTab(3)">4. RESUMO</button>
+            <button class="tab-btn" onclick="switchTab(2)">3. TERÇAS</button>
+            <button class="tab-btn" onclick="switchTab(3)">4. PREÇOS</button>
+            <button class="tab-btn" onclick="switchTab(4)">5. RESUMO</button>
+            <button class="tab-btn" onclick="switchTab(5)" style="background:#e67e22; color:white">6. ORÇAMENTO</button>
         </div>
 
         <div class="tab-content active" id="tab0">
@@ -61,18 +52,33 @@
             <input type="number" id="comprimento" value="30" oninput="redesenharTudo()">
             <label>Espaçamento entre Eixos (m)</label>
             <input type="number" id="distancia" value="5" oninput="redesenharTudo()">
-            <button class="btn-acao" onclick="removerInternos()">Remover Colunas Internas</button>
+            
+            <label>Colunas Internas</label>
+            <select id="configColunas" onchange="alternarColunasInternas()">
+                <option value="todas">Manter Todas as Colunas</option>
+                <option value="vazio">Remover Colunas Internas (Vão Livre)</option>
+            </select>
         </div>
 
         <div class="tab-content" id="tab1">
-            <h3>Corte Técnico</h3>
+            <h3>Corte Técnico & Colunas</h3>
             <label>Modelo de Cobertura</label>
             <select id="forma" onchange="atualizarDesenhos()">
                 <option value="duasAguas">Duas Águas (Tesoura)</option>
                 <option value="umaAgua">Uma Água</option>
                 <option value="arco">Arco Treliçado</option>
-                <option value="paralela">Treliças Paralelas (Plano)</option>
+                <option value="paralela">Treliças Paralelas</option>
             </select>
+            <label>Tipo de Perfil da Coluna</label>
+            <select id="perfilColuna" onchange="atualizarDesenhos()">
+                <option value="U">Perfil U Enrijecido</option>
+                <option value="W">Perfil I / W (Laminado)</option>
+                <option value="H">Perfil H</option>
+                <option value="Tubo">Tubo Quadrado/Retangular</option>
+                <option value="Redondo">Tubo Redondo</option>
+            </select>
+            <label>Espessura da Chapa (mm)</label>
+            <input type="number" id="espessuraColuna" value="4.75" step="0.01" oninput="atualizarDesenhos()">
             <label>Altura Pé-Direito (m)</label>
             <input type="number" id="alturaPilar" value="6" oninput="atualizarDesenhos()">
             <label>Inclinação (%) / Altura Treliça (m)</label>
@@ -82,31 +88,52 @@
         </div>
 
         <div class="tab-content" id="tab2">
+            <h3>Configuração das Terças</h3>
+            <label>Espaçamento entre Terças (m)</label>
+            <input type="number" id="espacamentoTercas" value="1.2" step="0.1" oninput="atualizarDesenhos()">
+            <label>Perfil (Altura mm)</label>
+            <input type="number" id="perfilH" value="100" oninput="atualizarDesenhos()">
+            <label>Perfil (Aba mm)</label>
+            <input type="number" id="perfilB" value="40" oninput="atualizarDesenhos()">
+            <label>Espessura (mm)</label>
+            <input type="number" id="perfilE" value="2.25" step="0.05" oninput="atualizarDesenhos()">
+        </div>
+
+        <div class="tab-content" id="tab3">
             <h3>Custos</h3>
             <label>Preço Aço (R$/kg)</label><input type="number" id="precoAco" value="13.50" oninput="calcularTudo()">
             <label>BDI Operacional (%)</label><input type="number" id="bdi" value="25" oninput="calcularTudo()">
         </div>
-
-        <div class="tab-content" id="tab3">
+        <div class="tab-content" id="tab4">
             <h3>Resumo Financeiro</h3>
             <div id="orcamentoFinal" style="background: var(--primary); color: white; padding: 20px; border-radius: 8px;"></div>
+        </div>
+        <div class="tab-content" id="tab5">
+            <h3>Lista de Materiais e Custos</h3>
+            <div id="listaOrcamentoDetalhada"></div>
         </div>
     </div>
 
     <div class="visualizacao">
         <div id="containerPlanta">
             <h4 style="display:inline-block">Planta de Locação</h4> 
-            <button onclick="toggle3D()" style="font-size:10px; margin-left:10px">Alternar Visão 3D</button>
+            <button onclick="toggle3D('desenhoPlanta')" style="font-size:10px; margin-left:10px">Alternar Visão 3D</button>
             <div id="desenhoPlanta"></div>
         </div>
 
         <div id="containerCorte" style="display:none;">
-            <h4>Corte Realista (Treliçamento)</h4>
+            <h4 style="display:inline-block">Corte Detalhado</h4>
+            <button onclick="toggle3D('canvasCorte')" style="font-size:10px; margin-left:10px">Alternar Visão 3D</button>
             <canvas id="canvasCorte" width="800" height="450"></canvas>
         </div>
 
+        <div id="containerPlantaTercasVis" style="display:none;">
+            <h4>Planta de Cobertura</h4>
+            <canvas id="canvasPlantaTercasVis" width="800" height="500"></canvas>
+        </div>
+
         <div class="painel-consumo">
-            <h4>Levantamento de Consumo de Materiais</h4>
+            <h4>Levantamento de Materiais</h4>
             <div class="grade-consumo" id="listaConsumo"></div>
         </div>
     </div>
@@ -114,11 +141,9 @@
 
 <script>
     let pilaresOcultos = new Set();
-    let is3D = false;
 
-    function toggle3D() {
-        is3D = !is3D;
-        document.getElementById("desenhoPlanta").classList.toggle("visao-3d", is3D);
+    function toggle3D(elementId) {
+        document.getElementById(elementId).classList.toggle("visao-3d");
     }
 
     function switchTab(idx) {
@@ -126,18 +151,79 @@
         document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === idx));
         document.getElementById("containerPlanta").style.display = (idx === 0) ? "block" : "none";
         document.getElementById("containerCorte").style.display = (idx === 1) ? "block" : "none";
+        document.getElementById("containerPlantaTercasVis").style.display = (idx === 2) ? "block" : "none";
         atualizarDesenhos();
     }
 
     function redesenharTudo() {
         pilaresOcultos.clear();
+        document.getElementById("configColunas").value = "todas";
         atualizarDesenhos();
     }
 
     function atualizarDesenhos() {
         desenharPlanta();
         desenharCorte();
+        desenharPlantaTercasGrande();
         calcularTudo();
+    }
+
+    function desenharCorte() {
+        const canvas = document.getElementById("canvasCorte");
+        const ctx = canvas.getContext("2d");
+        const forma = document.getElementById("forma").value;
+        const pColuna = document.getElementById("perfilColuna").value;
+        const L = parseFloat(document.getElementById("largura").value) || 1;
+        const H = parseFloat(document.getElementById("alturaPilar").value) || 1;
+        const B = parseFloat(document.getElementById("beiral").value) || 0;
+        const inc = parseFloat(document.getElementById("inclinacao").value) || 0;
+        
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        const margemH = 100;
+        const esc = (canvas.width - margemH * 2) / (L + B*2);
+        const x0 = margemH + B*esc;
+        const yBase = 400; 
+        const yTopo = yBase - (H * esc);
+        
+        ctx.fillStyle = "#34495e";
+        let larguraVisualColuna = pColuna === "W" || pColuna === "H" ? 20 : 12;
+        ctx.fillRect(x0 - larguraVisualColuna/2, yTopo, larguraVisualColuna, H*esc); 
+        ctx.fillRect(x0 + L*esc - larguraVisualColuna/2, yTopo, larguraVisualColuna, H*esc); 
+        
+        ctx.strokeStyle = "#e67e22"; ctx.lineWidth = 4; ctx.lineJoin = "round";
+        let yPico = yTopo;
+
+        if(forma === "duasAguas") {
+            const f = (L/2) * (inc/100);
+            yPico = yTopo - f*esc;
+            ctx.beginPath(); ctx.moveTo(x0 - B*esc, yTopo); ctx.lineTo(x0 + (L/2)*esc, yPico);
+            ctx.lineTo(x0 + L*esc + B*esc, yTopo); ctx.stroke();
+        } else if(forma === "arco") {
+            const fArco = inc * 10;
+            yPico = yTopo - fArco;
+            ctx.beginPath(); ctx.moveTo(x0 - B*esc, yTopo);
+            ctx.quadraticCurveTo(x0 + (L/2)*esc, yTopo - fArco, x0 + L*esc + B*esc, yTopo); ctx.stroke();
+        } else if(forma === "paralela") {
+            const hT = inc; yPico = yTopo - hT*esc;
+            ctx.strokeRect(x0 - B*esc, yPico, (L + B*2)*esc, hT*esc);
+        } else if(forma === "umaAgua") {
+            const f = L * (inc/100); yPico = yTopo - f*esc;
+            ctx.beginPath(); ctx.moveTo(x0 - B*esc, yTopo); 
+            ctx.lineTo(x0 + L*esc + B*esc, yPico); ctx.stroke();
+        }
+
+        ctx.fillStyle = "white"; ctx.font = "12px Arial";
+        ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 1;
+
+        ctx.beginPath(); ctx.moveTo(x0, yBase + 20); ctx.lineTo(x0 + L*esc, yBase + 20); ctx.stroke();
+        ctx.fillText(L + "m", x0 + (L*esc/2) - 10, yBase + 15);
+
+        ctx.beginPath(); ctx.moveTo(x0 - 40, yBase); ctx.lineTo(x0 - 40, yTopo); ctx.stroke();
+        ctx.fillText(H + "m", x0 - 70, yTopo + (H*esc/2));
+
+        const hTotal = (yBase - yPico) / esc;
+        ctx.beginPath(); ctx.moveTo(x0 + L*esc + 40, yBase); ctx.lineTo(x0 + L*esc + 40, yPico); ctx.stroke();
+        ctx.fillText(hTotal.toFixed(2) + "m", x0 + L*esc + 45, yPico + (yBase-yPico)/2);
     }
 
     function desenharPlanta() {
@@ -145,32 +231,20 @@
         const C = parseFloat(document.getElementById("comprimento").value) || 1;
         const d = parseFloat(document.getElementById("distancia").value) || 1;
         const container = document.getElementById("desenhoPlanta");
-        
         container.innerHTML = "";
         const esc = 18; 
         container.style.width = (L * esc) + "px";
         container.style.height = (C * esc) + "px";
-
         const vaosX = Math.round(L / d);
         const vaosY = Math.round(C / d);
-
         for (let j = 0; j <= vaosY; j++) {
             const posY = j * (C / vaosY) * esc;
-            if (j < vaosY) {
-                const cV = document.createElement("div");
-                cV.className = "cota-v";
-                cV.style.top = posY + "px";
-                cV.style.height = ((C/vaosY) * esc) + "px";
-                cV.innerHTML = `<span style="transform: rotate(-90deg)">${(C/vaosY).toFixed(2)}m</span>`;
-                container.appendChild(cV);
-            }
             for (let i = 0; i <= vaosX; i++) {
                 const posX = i * (L / vaosX) * esc;
                 const id = `p-${j}-${i}`;
                 const p = document.createElement("div");
                 p.className = "ponto " + (pilaresOcultos.has(id) ? "inativo" : "ativo");
-                p.style.left = posX + "px";
-                p.style.top = posY + "px";
+                p.style.left = posX + "px"; p.style.top = posY + "px";
                 p.onclick = () => {
                     if (pilaresOcultos.has(id)) pilaresOcultos.delete(id);
                     else pilaresOcultos.add(id);
@@ -179,193 +253,120 @@
                 container.appendChild(p);
             }
         }
-        const cH = document.createElement("div");
-        cH.className = "cota-h";
-        cH.style.width = (L * esc) + "px";
-        cH.innerHTML = L.toFixed(1) + "m";
-        container.appendChild(cH);
     }
 
-    function removerInternos() {
+    function desenharPlantaTercasGrande() {
+        const canvas = document.getElementById("canvasPlantaTercasVis");
+        const ctx = canvas.getContext("2d");
+        const L = parseFloat(document.getElementById("largura").value) || 1;
+        const C = parseFloat(document.getElementById("comprimento").value) || 1;
+        const B = parseFloat(document.getElementById("beiral").value) || 0;
+        const d = parseFloat(document.getElementById("distancia").value) || 1;
+        const espTercas = parseFloat(document.getElementById("espacamentoTercas").value) || 1.2;
+        const inc = parseFloat(document.getElementById("inclinacao").value) || 0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const padding = 50;
+        const esc = Math.min((canvas.width - padding*2) / L, (canvas.height - padding*2) / C);
+        const xOff = (canvas.width - L * esc) / 2;
+        const yOff = (canvas.height - C * esc) / 2;
+        ctx.strokeStyle = "#555"; ctx.lineWidth = 2;
+        ctx.strokeRect(xOff, yOff, L*esc, C*esc);
+        const quantTrelicas = Math.round(C / d) + 1;
+        for(let i=0; i<quantTrelicas; i++) {
+            const py = yOff + (i * (C/(quantTrelicas-1)) * esc);
+            ctx.beginPath(); ctx.moveTo(xOff, py); ctx.lineTo(xOff + L*esc, py); ctx.stroke();
+        }
+        ctx.strokeStyle = "#e67e22"; ctx.lineWidth = 2;
+        const compInclinado = Math.sqrt(Math.pow(L, 2) + Math.pow((L * inc/100), 2));
+        const totalLinhas = Math.ceil((compInclinado + B*2) / espTercas) + 1;
+        for(let j=0; j<totalLinhas; j++) {
+            const px = xOff + (j * (L/(totalLinhas-1)) * esc);
+            ctx.beginPath(); ctx.moveTo(px, yOff); ctx.lineTo(px, yOff + C*esc); ctx.stroke();
+        }
+    }
+
+    function calcularTudo() {
+        const L = parseFloat(document.getElementById("largura").value);
+        const C = parseFloat(document.getElementById("comprimento").value);
+        const H = parseFloat(document.getElementById("alturaPilar").value);
+        const B = parseFloat(document.getElementById("beiral").value);
+        const dist = parseFloat(document.getElementById("distancia").value);
+        const inc = parseFloat(document.getElementById("inclinacao").value);
+        const precoAco = parseFloat(document.getElementById("precoAco").value) || 0;
+        const bdiFator = parseFloat(document.getElementById("bdi").value) / 100;
+        const espacTercas = parseFloat(document.getElementById("espacamentoTercas").value);
+
+        const pilaresAtivos = document.querySelectorAll(".ponto.ativo").length;
+        const pesoPilares = pilaresAtivos * (H * 22);
+        const custoPilares = pesoPilares * precoAco;
+        const quantTrelicas = Math.round(C / dist) + 1;
+        const pesoTrelicas = quantTrelicas * (L * 20);
+        const custoTrelicas = pesoTrelicas * precoAco;
+        const compInclinado = Math.sqrt(Math.pow(L, 2) + Math.pow((L * inc/100), 2));
+        const linhasTercas = Math.ceil((compInclinado + B*2) / espacTercas) + 1;
+        const metrosTercas = linhasTercas * C;
+        const pesoTercas = metrosTercas * 6.5;
+        const custoTercas = pesoTercas * precoAco;
+        const areaReal = (L * C) * (1 + (inc/100) * 0.15);
+        const custoTelhas = areaReal * 68;
+        const custoFundacao = pilaresAtivos * 225;
+
+        const totalAco = pesoPilares + pesoTrelicas + pesoTercas;
+        const subtotal = custoPilares + custoTrelicas + custoTercas + custoTelhas + custoFundacao;
+        const lucroValor = subtotal * bdiFator;
+        const totalFinal = subtotal + lucroValor;
+
+        document.getElementById("orcamentoFinal").innerHTML = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px"><span>Aço Total:</span> <b>${totalAco.toFixed(0)} kg</b></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px"><span>Custo Base:</span> <b>R$ ${subtotal.toLocaleString('pt-BR')}</b></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#2ecc71"><span>Lucro/BDI (${(bdiFator*100).toFixed(0)}%):</span> <b>R$ ${lucroValor.toLocaleString('pt-BR')}</b></div>
+            <hr style="opacity:0.3">
+            <div style="font-size:22px; color:var(--accent); text-align:center; font-weight:bold">TOTAL: R$ ${totalFinal.toLocaleString('pt-BR')}</div>
+        `;
+
+        document.getElementById("listaOrcamentoDetalhada").innerHTML = `
+            <table class="tabela-orcamento">
+                <thead><tr><th>Item</th><th>Qtd</th><th>Custo (R$)</th></tr></thead>
+                <tbody>
+                    <tr><td>Pilares</td><td>${pilaresAtivos} un</td><td>${custoPilares.toLocaleString('pt-BR')}</td></tr>
+                    <tr><td>Treliças</td><td>${quantTrelicas} un</td><td>${custoTrelicas.toLocaleString('pt-BR')}</td></tr>
+                    <tr><td>Terças</td><td>${metrosTercas.toFixed(1)} m</td><td>${custoTercas.toLocaleString('pt-BR')}</td></tr>
+                    <tr><td>Telhas</td><td>${areaReal.toFixed(1)} m²</td><td>${custoTelhas.toLocaleString('pt-BR')}</td></tr>
+                    <tr><td>Fundação</td><td>${pilaresAtivos} un</td><td>${custoFundacao.toLocaleString('pt-BR')}</td></tr>
+                    <tr style="font-weight:bold; background:#f8f9fa"><td>Soma dos Custos</td><td>-</td><td>${subtotal.toLocaleString('pt-BR')}</td></tr>
+                    <tr style="color:#27ae60; font-weight:bold"><td>Lucro / BDI</td><td>-</td><td>${lucroValor.toLocaleString('pt-BR')}</td></tr>
+                    <tr style="background:var(--primary); color:white; font-weight:bold"><td>TOTAL ORÇAMENTO</td><td>-</td><td>${totalFinal.toLocaleString('pt-BR')}</td></tr>
+                </tbody>
+            </table>
+        `;
+
+        document.getElementById("listaConsumo").innerHTML = `
+            <div class="card-consumo"><h5>Pilares</h5><p>${pilaresAtivos} un</p></div>
+            <div class="card-consumo"><h5>Treliças</h5><p>${quantTrelicas} un</p></div>
+            <div class="card-consumo"><h5>Terças</h5><p>${metrosTercas.toFixed(1)} m</p></div>
+        `;
+    }
+
+    function alternarColunasInternas() {
+        const opcao = document.getElementById("configColunas").value;
         const L = parseFloat(document.getElementById("largura").value);
         const C = parseFloat(document.getElementById("comprimento").value);
         const d = parseFloat(document.getElementById("distancia").value);
         const vaosX = Math.round(L / d);
         const vaosY = Math.round(C / d);
-        for (let j = 1; j < vaosY; j++) {
-            for (let i = 1; i < vaosX; i++) {
-                pilaresOcultos.add(`p-${j}-${i}`);
+
+        pilaresOcultos.clear();
+        if (opcao === "vazio") {
+            for (let j = 1; j < vaosY; j++) {
+                for (let i = 1; i < vaosX; i++) { 
+                    pilaresOcultos.add(`p-${j}-${i}`); 
+                }
             }
         }
         atualizarDesenhos();
     }
 
-    function desenharCorte() {
-        const canvas = document.getElementById("canvasCorte");
-        const ctx = canvas.getContext("2d");
-        const forma = document.getElementById("forma").value;
-        const L = parseFloat(document.getElementById("largura").value) || 1;
-        const H = parseFloat(document.getElementById("alturaPilar").value) || 1;
-        const B = parseFloat(document.getElementById("beiral").value) || 0;
-        const inc = parseFloat(document.getElementById("inclinacao").value) || 0;
-        
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        const esc = 350 / (L + B*2 + H);
-        const x0 = 100 + B*esc, yBase = 420, yTopo = yBase - (H * esc);
-
-        // Pilares 3D (Efeito de Profundidade)
-        ctx.fillStyle = "#2c3e50";
-        ctx.fillRect(x0-8, yTopo, 16, H*esc); // Pilar Esq
-        ctx.fillRect(x0 + L*esc - 8, yTopo, 16, H*esc); // Pilar Dir
-        ctx.fillStyle = "#34495e";
-        ctx.fillRect(x0-4, yTopo, 8, H*esc);
-
-        // Treliçamento
-        ctx.strokeStyle = "#e67e22"; ctx.lineWidth = 2;
-        
-        function desenharBanzo(x1, y1, x2, y2) {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
-            ctx.stroke();
-            // Montantes e Diagonais
-            let dist = Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
-            let passos = Math.floor(dist/30);
-            for(let k=0; k<=passos; k++) {
-                let px = x1 + (x2-x1)*(k/passos);
-                let py = y1 + (y2-y1)*(k/passos);
-                ctx.beginPath();
-                ctx.moveTo(px, py); ctx.lineTo(px, py + 15); // Exemplo simples
-                ctx.stroke();
-            }
-        }
-
-        if(forma === "duasAguas") {
-            const f = (L/2) * (inc/100);
-            desenharBanzo(x0 - B*esc, yTopo, x0 + (L/2)*esc, yTopo - f*esc);
-            desenharBanzo(x0 + (L/2)*esc, yTopo - f*esc, x0 + L*esc + B*esc, yTopo);
-        } else if(forma === "arco") {
-            ctx.beginPath();
-            ctx.moveTo(x0 - B*esc, yTopo);
-            ctx.quadraticCurveTo(x0 + (L/2)*esc, yTopo - (inc*10), x0 + L*esc + B*esc, yTopo);
-            ctx.stroke();
-        } else if(forma === "paralela") {
-            const hT = inc; // Altura da treliça
-            ctx.strokeRect(x0 - B*esc, yTopo - hT*esc, (L + B*2)*esc, hT*esc);
-            // Internos da treliça paralela
-            for(let m=0; m<L; m+=2) {
-                ctx.moveTo(x0 + m*esc, yTopo); ctx.lineTo(x0 + (m+1)*esc, yTopo - hT*esc);
-            }
-            ctx.stroke();
-        } else {
-            desenharBanzo(x0 - B*esc, yTopo, x0 + L*esc + B*esc, yTopo - (L * inc/100)*esc);
-        }
-
-        // Cotas
-        ctx.fillStyle = "white"; ctx.font = "bold 11px Arial";
-        ctx.fillText(H + "m", x0 - 50, yBase - (H*esc)/2);
-        ctx.fillText(L + "m Vão", x0 + (L*esc)/2 - 20, yTopo + 30);
-    }
-
-function calcularTudo() {
-
-    const L = parseFloat(document.getElementById("largura").value);
-    const C = parseFloat(document.getElementById("comprimento").value);
-    const H = parseFloat(document.getElementById("alturaPilar").value);
-    const dist = parseFloat(document.getElementById("distancia").value);
-    const inc = parseFloat(document.getElementById("inclinacao").value);
-    const forma = document.getElementById("forma").value;
-
-    const precoAco = parseFloat(document.getElementById("precoAco").value) || 0;
-    const bdi = 1 + (parseFloat(document.getElementById("bdi").value) / 100);
-
-    const pilares = document.querySelectorAll(".ponto.ativo").length;
-
-    // ===============================
-    // 1️⃣ PESOS ESTRUTURAIS
-    // ===============================
-
-    const pesoPilares = pilares * (H * 25);
-
-    const quantTrelicas = Math.round(C / dist) + 1;
-    let kgMetroTrelica = 18;
-
-    if (forma === "paralela") kgMetroTrelica = 22;
-    if (forma === "arco") kgMetroTrelica = 20;
-
-    const pesoTrelicas = quantTrelicas * (L * kgMetroTrelica);
-
-    const linhasTerca = Math.ceil(L / 1.5);
-    const comprimentoTotalTerca = linhasTerca * C;
-    const pesoTercas = comprimentoTotalTerca * 8;
-
-    const pesoTotalAco = pesoPilares + pesoTrelicas + pesoTercas;
-
-    // ===============================
-    // 2️⃣ TELHAS
-    // ===============================
-
-    const areaBase = L * C;
-    const areaReal = areaBase * (1 + (inc / 100) * 0.1);
-    const precoTelha = 65; // R$/m² padrão
-    const totalTelha = areaReal * precoTelha;
-
-    // ===============================
-    // 3️⃣ CALHAS
-    // ===============================
-
-    const comprimentoCalha = C * 2;
-    const precoCalha = 95;
-    const totalCalha = comprimentoCalha * precoCalha;
-
-    // ===============================
-    // 4️⃣ FUNDAÇÃO
-    // ===============================
-
-    const volumeFundacao = pilares * 0.512;
-    const precoConcreto = 450;
-    const totalFundacao = volumeFundacao * precoConcreto;
-
-    // ===============================
-    // 5️⃣ CUSTO FINAL
-    // ===============================
-
-    const custoEstrutura = pesoTotalAco * precoAco;
-    const subtotal = custoEstrutura + totalTelha + totalCalha + totalFundacao;
-    const totalFinal = subtotal * bdi;
-
-    // ===============================
-    // UI
-    // ===============================
-
-    document.getElementById("listaConsumo").innerHTML = `
-        <div class="card-consumo"><h5>Pilares</h5><p>${pilares} un</p></div>
-        <div class="card-consumo"><h5>Treliças</h5><p>${quantTrelicas} un</p></div>
-        <div class="card-consumo"><h5>Aço Total</h5><p>${pesoTotalAco.toFixed(0)} kg</p></div>
-        <div class="card-consumo"><h5>Telhas</h5><p>${areaReal.toFixed(1)} m²</p></div>
-        <div class="card-consumo"><h5>Concreto</h5><p>${volumeFundacao.toFixed(2)} m³</p></div>
-    `;
-
-    document.getElementById("orcamentoFinal").innerHTML = `
-        <div style="font-size:12px; opacity:0.8">Estrutura Metálica</div>
-        <div>R$ ${custoEstrutura.toLocaleString('pt-BR')}</div>
-
-        <div style="font-size:12px; opacity:0.8; margin-top:8px;">Telhas</div>
-        <div>R$ ${totalTelha.toLocaleString('pt-BR')}</div>
-
-        <div style="font-size:12px; opacity:0.8; margin-top:8px;">Calhas</div>
-        <div>R$ ${totalCalha.toLocaleString('pt-BR')}</div>
-
-        <div style="font-size:12px; opacity:0.8; margin-top:8px;">Fundação</div>
-        <div>R$ ${totalFundacao.toLocaleString('pt-BR')}</div>
-
-        <hr style="margin:12px 0; border:1px solid rgba(255,255,255,0.2)">
-
-        <div style="font-size:26px; font-weight:bold; color:var(--accent)">
-            TOTAL R$ ${totalFinal.toLocaleString('pt-BR')}
-        </div>
-    `;
-}
-    window.onload = () => switchTab(0);
+    window.onload = () => { redesenharTudo(); switchTab(0); };
 </script>
 </body>
 </html>
