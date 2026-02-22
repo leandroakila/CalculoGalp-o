@@ -1,4 +1,527 @@
-/* ========================= */
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SteelCalc Pro - Sistema Completo de Orçamento de Galpões</title>
+    <style>
+        :root { 
+            --primary: #1f2d3d; 
+            --accent: #e67e22; 
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --bg: #f2f4f8; 
+            --card-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); 
+            color: #333; 
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .header-actions button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .header-actions button:hover {
+            background: #d35400;
+            transform: translateY(-2px);
+        }
+        
+        .container { 
+            display: flex; 
+            gap: 20px; 
+            max-width: 1600px; 
+            margin: 20px auto; 
+            padding: 0 20px;
+        }
+        
+        .painel { 
+            width: 400px; 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: var(--card-shadow); 
+            overflow: hidden; 
+            position: sticky; 
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tab-nav { 
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background: var(--primary); 
+        }
+        
+        .tab-btn { 
+            padding: 12px 8px; 
+            border: none; 
+            background: none; 
+            color: #fff; 
+            cursor: pointer; 
+            font-size: 10px; 
+            font-weight: bold; 
+            opacity: 0.6;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-btn.active { 
+            opacity: 1; 
+            border-bottom: 3px solid var(--accent);
+            background: rgba(230, 126, 34, 0.1);
+        }
+        
+        .tab-btn:hover {
+            opacity: 0.8;
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .tab-content { 
+            display: none; 
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .tab-content.active { display: block; }
+        
+        label { 
+            font-size: 11px; 
+            font-weight: bold; 
+            display: block; 
+            margin-top: 12px; 
+            color: #666; 
+            text-transform: uppercase; 
+        }
+        
+        input, select, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            margin-top: 5px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .btn-acao { 
+            background: var(--danger); 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            width: 100%; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-acao:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-success {
+            background: var(--success) !important;
+        }
+        
+        .btn-success:hover {
+            background: #229954 !important;
+        }
+        
+        .btn-accent {
+            background: var(--accent) !important;
+        }
+        
+        .visualizacao { 
+            flex: 1; 
+            background: white; 
+            padding: 25px; 
+            border-radius: 10px; 
+            box-shadow: var(--card-shadow);
+            min-height: 85vh;
+        }
+        
+        #desenhoPlanta { 
+            position: relative; 
+            border: 2px solid #ccc; 
+            background: linear-gradient(45deg, #fafafa 25%, transparent 25%, transparent 75%, #fafafa 75%), 
+                        linear-gradient(45deg, #fafafa 25%, transparent 25%, transparent 75%, #fafafa 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            margin: 40px auto; 
+            transition: transform 0.5s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .visao-3d { 
+            transform: rotateX(50deg) rotateZ(-35deg) scale(0.9); 
+            box-shadow: 20px 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .ponto { 
+            width: 18px; 
+            height: 18px; 
+            position: absolute; 
+            transform: translate(-50%,-50%); 
+            cursor: pointer; 
+            border: 2px solid #000; 
+            border-radius: 3px; 
+            z-index: 5;
+            transition: all 0.2s;
+        }
+        
+        .ponto:hover {
+            transform: translate(-50%,-50%) scale(1.2);
+        }
+        
+        .ativo { 
+            background: var(--success); 
+            box-shadow: 0 0 10px var(--success);
+            border-color: #1e8449;
+        }
+        
+        .inativo { 
+            background: #ecf0f1; 
+            border: 2px dashed #95a5a6; 
+            opacity: 0.5;
+        }
+        
+        canvas { 
+            background: #1a1a1a; 
+            border-radius: 8px; 
+            max-width: 100%; 
+            border: 4px solid #333; 
+            display: block; 
+            margin: 20px auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .painel-consumo { 
+            margin-top: 30px; 
+            border-top: 2px solid #eee; 
+            padding-top: 20px;
+        }
+        
+        .grade-consumo { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; 
+        }
+        
+        .card-consumo { 
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 20px; 
+            border-radius: 8px; 
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        
+        .card-consumo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card-consumo h5 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .card-consumo p {
+            color: #666;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .tabela-orcamento { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            font-size: 13px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tabela-orcamento th, .tabela-orcamento td { 
+            text-align: left; 
+            padding: 12px; 
+            border-bottom: 1px solid #eee; 
+        }
+        
+        .tabela-orcamento th { 
+            background: var(--primary);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .tabela-orcamento tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .medida-label { 
+            position: absolute; 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: var(--accent); 
+            background: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .resumo-financeiro {
+            background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .resumo-linha {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .resumo-total {
+            font-size: 26px;
+            color: var(--accent);
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .extras-container {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .extra-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .extra-item button {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .btn-toggle-3d {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn-toggle-3d:hover {
+            background: #d35400;
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--accent);
+        }
+        
+        .section-title h4 {
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover {
+            color: var(--danger);
+        }
+        
+        .orcamento-salvo {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .orcamento-salvo:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .cliente-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .cliente-form .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        @media print {
+            .painel, .header-actions, .btn-toggle-3d { display: none; }
+            .container { display: block; }
+            .visualizacao { box-shadow: none; }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group input {
+            flex: 1;
+        }
+	/* ========================= */
 /* 📱 RESPONSIVIDADE MOBILE  */
 /* ========================= */
 
@@ -76,4 +599,1203 @@
     .resumo-total {
         font-size: 20px;
     }
-}
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-content">
+        <div class="logo">⚙️ SteelCalc Pro</div>
+        <div class="header-actions">
+            <button onclick="abrirModalCliente()">👤 Dados do Cliente</button>
+            <button onclick="abrirModalOrcamentos()">📁 Orçamentos Salvos</button>
+            <button onclick="gerarRelatorioCompleto()">📄 Gerar Relatório PDF</button>
+            <button onclick="salvarOrcamento()" class="btn-success">💾 Salvar Orçamento</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="painel">
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab(0)">📐 GEOMETRIA</button>
+            <button class="tab-btn" onclick="switchTab(1)">🏗️ ESTRUTURA</button>
+            <button class="tab-btn" onclick="switchTab(2)">📏 TERÇAS</button>
+            <button class="tab-btn" onclick="switchTab(3)">💰 PREÇOS</button>
+            <button class="tab-btn" onclick="switchTab(4)">📊 CUSTOS</button>
+            <button class="tab-btn" onclick="switchTab(5)">📋 DETALHES</button>
+            <button class="tab-btn" onclick="switchTab(6)">🎯 RESUMO</button>
+            <button class="tab-btn" onclick="switchTab(7)">📑 ORÇAMENTO</button>
+            <button class="tab-btn" onclick="switchTab(8)">📦 MATERIAIS</button>
+        </div>
+
+        <!-- ABA 0: GEOMETRIA -->
+        <div class="tab-content active" id="tab0">
+            <h3>📐 Geometria do Galpão</h3>
+            <label>Largura (m)</label>
+            <input type="number" id="largura" value="15" step="0.5" oninput="redesenharTudo()">
+            
+            <label>Comprimento (m)</label>
+            <input type="number" id="comprimento" value="30" step="0.5" oninput="redesenharTudo()">
+            
+            <label>Espaçamento entre Eixos (m)</label>
+            <input type="number" id="distancia" value="5" step="0.5" oninput="redesenharTudo()">
+            
+            <label>Configuração de Colunas</label>
+            <select id="configColunas" onchange="alternarColunasInternas()">
+                <option value="todas">Manter Todas as Colunas</option>
+                <option value="vazio">Vão Livre (Remover Internas)</option>
+            </select>
+            
+            <div class="info-box">
+                💡 <strong>Dica:</strong> Clique nos pontos verdes na planta para remover/adicionar colunas individualmente.
+            </div>
+        </div>
+
+        <!-- ABA 1: ESTRUTURA -->
+        <div class="tab-content" id="tab1">
+            <h3>🏗️ Estrutura e Cobertura</h3>
+            
+            <label>Modelo de Cobertura</label>
+            <select id="forma" onchange="atualizarDesenhos()">
+                <option value="duasAguas">Duas Águas (Tesoura)</option>
+                <option value="umaAgua">Uma Água</option>
+                <option value="arco">Arco Treliçado</option>
+                <option value="paralela">Treliças Paralelas</option>
+            </select>
+            
+            <label>Tipo de Perfil da Coluna</label>
+            <select id="perfilColuna" onchange="atualizarPerfilColuna()">
+                <option value="U">Perfil U Enrijecido</option>
+                <option value="W">Perfil I / W (Laminado)</option>
+                <option value="H">Perfil H</option>
+                <option value="Tubo">Tubo Quadrado/Retangular</option>
+                <option value="Redondo">Tubo Redondo</option>
+            </select>
+            
+            <label>Espessura da Chapa (mm)</label>
+            <input type="number" id="espessuraColuna" value="2.65" step="0.05" oninput="atualizarDesenhos()">
+            
+            <label>Altura Pé-Direito (m)</label>
+            <input type="number" id="alturaPilar" value="6" step="0.5" oninput="atualizarDesenhos()">
+            
+            <label>Inclinação (%) / Altura Treliça (m)</label>
+            <input type="number" id="inclinacao" value="15" step="1" oninput="atualizarDesenhos()">
+            
+            <label>Beiral (m)</label>
+            <input type="number" id="beiral" value="0.8" step="0.1" oninput="atualizarDesenhos()">
+            
+            <label>Tipo de Treliça</label>
+            <select id="tipoTrelica" onchange="atualizarDesenhos()">
+                <option value="pratt">Pratt (Diagonal Comprimida)</option>
+                <option value="howe">Howe (Diagonal Tracionada)</option>
+                <option value="warren">Warren (Zig-zag)</option>
+            </select>
+        </div>
+
+        <!-- ABA 2: TERÇAS -->
+        <div class="tab-content" id="tab2">
+            <h3>📏 Configuração das Terças</h3>
+            
+            <label>Espaçamento entre Terças (m)</label>
+            <input type="number" id="espacamentoTercas" value="1.2" step="0.1" oninput="atualizarDesenhos()">
+            
+            <label>Perfil - Altura (mm)</label>
+            <input type="number" id="perfilH" value="100" step="10" oninput="atualizarDesenhos()">
+            
+            <label>Perfil - Aba (mm)</label>
+            <input type="number" id="perfilB" value="40" step="5" oninput="atualizarDesenhos()">
+            
+            <label>Espessura (mm)</label>
+            <input type="number" id="perfilE" value="2.25" step="0.05" oninput="atualizarDesenhos()">
+            
+            <label>Tipo de Fixação</label>
+            <select id="fixacaoTercas" onchange="atualizarDesenhos()">
+                <option value="parafusada">Parafusada</option>
+                <option value="soldada">Soldada</option>
+            </select>
+            
+            <div class="info-box">
+                📌 As terças serão calculadas automaticamente com base no espaçamento e dimensões do galpão.
+            </div>
+        </div>
+
+        <!-- ABA 3: PREÇOS -->
+        <div class="tab-content" id="tab3">
+            <h3>💰 Tabela de Preços</h3>
+            
+            <label>Aço Estrutural (R$/kg)</label>
+            <input type="number" id="precoAco" value="13.50" step="0.10" oninput="calcularTudo()">
+            
+            <label>Telha Termoacústica (R$/m²)</label>
+            <input type="number" id="precoTelha" value="68.00" step="1" oninput="calcularTudo()">
+            
+            <label>Telha Metálica Simples (R$/m²)</label>
+            <input type="number" id="precoTelhaSimples" value="35.00" step="1" oninput="calcularTudo()">
+            
+            <label>Tipo de Telha</label>
+            <select id="tipoTelha" onchange="calcularTudo()">
+                <option value="termoacustica">Termoacústica</option>
+                <option value="simples">Metálica Simples</option>
+            </select>
+            
+            <label>Mão de Obra Montagem (R$/m²)</label>
+            <input type="number" id="precoMaoObra" value="45.00" step="1" oninput="calcularTudo()">
+            
+            <label>Fundação/Base Pilares (R$/unid)</label>
+            <input type="number" id="precoFundacao" value="250.00" step="10" oninput="calcularTudo()">
+            
+            <label>Parafusos/Fixações (R$/kg estrutura)</label>
+            <input type="number" id="precoParafusos" value="2.50" step="0.10" oninput="calcularTudo()">
+            
+            <label>Pintura/Proteção (R$/kg estrutura)</label>
+            <input type="number" id="precoPintura" value="3.80" step="0.10" oninput="calcularTudo()">
+            
+            <label>Frete e Logística (%)</label>
+            <input type="number" id="percFrete" value="5" step="0.5" oninput="calcularTudo()">
+            
+            <label>Contingências e Perdas (%)</label>
+            <input type="number" id="percContingencia" value="8" step="0.5" oninput="calcularTudo()">
+            
+            <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #ccc">
+            
+            <h4>+ Itens Extras</h4>
+            <div class="input-group">
+                <input type="text" id="nomeExtra" placeholder="Ex: Calhas, Portas">
+                <input type="number" id="valorExtra" placeholder="R$">
+            </div>
+            <button class="btn-acao btn-accent" onclick="adicionarItemExtra()">ADICIONAR</button>
+            
+            <div id="listaExtrasAdicionados" class="extras-container"></div>
+            
+            <label>BDI / Margem de Lucro (%)</label>
+            <input type="number" id="bdi" value="25" step="1" oninput="calcularTudo()">
+        </div>
+
+        <!-- ABA 4: CUSTOS -->
+        <div class="tab-content" id="tab4">
+            <h3>📊 Análise de Custos</h3>
+            <div id="analiseCustomizada"></div>
+        </div>
+
+        <!-- ABA 5: DETALHES -->
+        <div class="tab-content" id="tab5">
+            <h3>📋 Detalhamento Técnico</h3>
+            <div id="detalhamentoTecnico"></div>
+        </div>
+
+        <!-- ABA 6: RESUMO -->
+        <div class="tab-content" id="tab6">
+            <h3>🎯 Resumo Financeiro</h3>
+            <div id="orcamentoFinal" class="resumo-financeiro"></div>
+        </div>
+
+        <!-- ABA 7: ORÇAMENTO -->
+        <div class="tab-content" id="tab7">
+            <h3>📑 Lista Orçamentária</h3>
+            <div id="listaOrcamentoDetalhada"></div>
+        </div>
+
+        <!-- ABA 8: MATERIAIS -->
+        <div class="tab-content" id="tab8">
+            <h3>📦 Lista de Materiais</h3>
+            <div id="listaMateriais"></div>
+        </div>
+    </div>
+
+    <div class="visualizacao">
+        <!-- PLANTA DE LOCAÇÃO -->
+        <div id="containerPlanta">
+            <div class="section-title">
+                <h4>📐 Planta de Locação</h4>
+                <button class="btn-toggle-3d" onclick="toggle3D('desenhoPlanta')">🔄 Visão 3D</button>
+            </div>
+            <div id="desenhoPlanta"></div>
+        </div>
+
+        <!-- CORTE TÉCNICO -->
+        <div id="containerCorte" style="display:none;">
+            <div class="section-title">
+                <h4>🏗️ Corte Técnico</h4>
+                <button class="btn-toggle-3d" onclick="toggle3D('canvasCorte')">🔄 Visão 3D</button>
+            </div>
+            <canvas id="canvasCorte" width="900" height="500"></canvas>
+        </div>
+
+        <!-- PLANTA DE COBERTURA -->
+        <div id="containerPlantaTercasVis" style="display:none;">
+            <div class="section-title">
+                <h4>📏 Planta de Cobertura</h4>
+                <button class="btn-toggle-3d" onclick="toggle3D('canvasPlantaTercasVis')">🔄 Visão 3D</button>
+            </div>
+            <canvas id="canvasPlantaTercasVis" width="900" height="550"></canvas>
+        </div>
+
+        <!-- CONSUMO DE MATERIAIS -->
+        <div class="painel-consumo">
+            <div class="section-title">
+                <h4>📦 Levantamento de Materiais</h4>
+            </div>
+            <div class="grade-consumo" id="listaConsumo"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE CLIENTE -->
+<div id="modalCliente" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModalCliente()">&times;</span>
+        <h2>👤 Dados do Cliente</h2>
+        <form class="cliente-form">
+            <div>
+                <label>Nome/Razão Social</label>
+                <input type="text" id="clienteNome">
+            </div>
+            <div>
+                <label>CPF/CNPJ</label>
+                <input type="text" id="clienteCPFCNPJ">
+            </div>
+            <div>
+                <label>Telefone</label>
+                <input type="tel" id="clienteTelefone">
+            </div>
+            <div>
+                <label>Email</label>
+                <input type="email" id="clienteEmail">
+            </div>
+            <div class="full-width">
+                <label>Endereço da Obra</label>
+                <textarea id="clienteEndereco" rows="2"></textarea>
+            </div>
+            <div class="full-width">
+                <label>Observações</label>
+                <textarea id="clienteObs" rows="3"></textarea>
+            </div>
+        </form>
+        <button class="btn-acao btn-success" onclick="salvarDadosCliente()">💾 Salvar Dados</button>
+    </div>
+</div>
+
+<!-- MODAL DE ORÇAMENTOS SALVOS -->
+<div id="modalOrcamentos" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModalOrcamentos()">&times;</span>
+        <h2>📁 Orçamentos Salvos</h2>
+        <div id="listaOrcamentosSalvos"></div>
+    </div>
+</div>
+
+<script>
+    // ===== VARIÁVEIS GLOBAIS =====
+    let pilaresOcultos = new Set();
+    let itensExtras = [];
+    let dadosCliente = {};
+    let orcamentosSalvos = JSON.parse(localStorage.getItem('orcamentos') || '[]');
+
+    // ===== FUNÇÕES DE INTERFACE =====
+    function switchTab(idx) {
+        document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+        document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === idx));
+        
+        document.getElementById("containerPlanta").style.display = (idx === 0) ? "block" : "none";
+        document.getElementById("containerCorte").style.display = (idx === 1) ? "block" : "none";
+        document.getElementById("containerPlantaTercasVis").style.display = (idx === 2) ? "block" : "none";
+        
+        if (idx >= 4) calcularTudo();
+        atualizarDesenhos();
+    }
+
+    function toggle3D(elementId) {
+        document.getElementById(elementId).classList.toggle("visao-3d");
+    }
+
+    function redesenharTudo() {
+        pilaresOcultos.clear();
+        document.getElementById("configColunas").value = "todas";
+        atualizarDesenhos();
+    }
+
+    function atualizarPerfilColuna() {
+        const espessurasPadrao = {
+            "U": 2.65,
+            "W": 6.30,
+            "H": 8.00,
+            "Tubo": 3.00,
+            "Redondo": 2.00
+        };
+        const perfil = document.getElementById("perfilColuna").value;
+        if (espessurasPadrao[perfil]) {
+            document.getElementById("espessuraColuna").value = espessurasPadrao[perfil];
+        }
+        atualizarDesenhos();
+    }
+
+    function atualizarDesenhos() {
+        desenharPlanta();
+        desenharCorte();
+        desenharPlantaTercasGrande();
+        calcularTudo();
+    }
+
+    // ===== DESENHO DA PLANTA =====
+    function desenharPlanta() {
+        const L = parseFloat(document.getElementById("largura").value) || 1;
+        const C = parseFloat(document.getElementById("comprimento").value) || 1;
+        const d = parseFloat(document.getElementById("distancia").value) || 1;
+        const container = document.getElementById("desenhoPlanta");
+        container.innerHTML = "";
+        
+        const esc = 20;
+        container.style.width = (L * esc) + "px";
+        container.style.height = (C * esc) + "px";
+        
+        const vaosX = Math.round(L / d);
+        const vaosY = Math.round(C / d);
+
+        // Labels de medida
+        const labelL = document.createElement("div");
+        labelL.className = "medida-label";
+        labelL.style.width = "100%";
+        labelL.style.textAlign = "center";
+        labelL.style.top = "-30px";
+        labelL.innerHTML = `<strong>LARGURA: ${L}m</strong>`;
+        container.appendChild(labelL);
+
+        const labelC = document.createElement("div");
+        labelC.className = "medida-label";
+        labelC.style.left = "-90px";
+        labelC.style.top = "50%";
+        labelC.style.transform = "translateY(-50%) rotate(-90deg)";
+        labelC.innerHTML = `<strong>COMPRIMENTO: ${C}m</strong>`;
+        container.appendChild(labelC);
+
+        // Desenhar pontos (colunas)
+        for (let j = 0; j <= vaosY; j++) {
+            const posY = j * (C / vaosY) * esc;
+            for (let i = 0; i <= vaosX; i++) {
+                const posX = i * (L / vaosX) * esc;
+                const id = `p-${j}-${i}`;
+                const p = document.createElement("div");
+                p.className = "ponto " + (pilaresOcultos.has(id) ? "inativo" : "ativo");
+                p.style.left = posX + "px";
+                p.style.top = posY + "px";
+                p.title = `Coluna ${j}-${i}`;
+                p.onclick = () => {
+                    if (pilaresOcultos.has(id)) pilaresOcultos.delete(id);
+                    else pilaresOcultos.add(id);
+                    atualizarDesenhos();
+                };
+                container.appendChild(p);
+            }
+        }
+    }
+
+    // ===== DESENHO DO CORTE =====
+    function desenharCorte() {
+        const canvas = document.getElementById("canvasCorte");
+        const ctx = canvas.getContext("2d");
+        const forma = document.getElementById("forma").value;
+        const pColuna = document.getElementById("perfilColuna").value;
+        const L = parseFloat(document.getElementById("largura").value) || 1;
+        const H = parseFloat(document.getElementById("alturaPilar").value) || 1;
+        const B = parseFloat(document.getElementById("beiral").value) || 0;
+        const inc = parseFloat(document.getElementById("inclinacao").value) || 0;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const margemH = 120;
+        const esc = (canvas.width - margemH * 2) / (L + B * 2);
+        const x0 = margemH + B * esc;
+        const yBase = 420;
+        const yTopo = yBase - (H * esc);
+        
+        // Desenhar colunas
+        ctx.fillStyle = "#34495e";
+        let larguraVisualColuna = pColuna === "W" || pColuna === "H" ? 24 : 14;
+        ctx.fillRect(x0 - larguraVisualColuna/2, yTopo, larguraVisualColuna, H * esc);
+        ctx.fillRect(x0 + L * esc - larguraVisualColuna/2, yTopo, larguraVisualColuna, H * esc);
+        
+        // Desenhar cobertura
+        ctx.strokeStyle = "#e67e22";
+        ctx.lineWidth = 5;
+        ctx.lineJoin = "round";
+        let yPico = yTopo;
+
+        if (forma === "duasAguas") {
+            const f = (L/2) * (inc/100);
+            yPico = yTopo - f * esc;
+            ctx.beginPath();
+            ctx.moveTo(x0 - B * esc, yTopo);
+            ctx.lineTo(x0 + (L/2) * esc, yPico);
+            ctx.lineTo(x0 + L * esc + B * esc, yTopo);
+            ctx.stroke();
+        } else if (forma === "arco") {
+            const fArco = (inc/5) * 50;
+            yPico = yTopo - fArco;
+            ctx.beginPath();
+            ctx.moveTo(x0 - B * esc, yTopo);
+            ctx.quadraticCurveTo(x0 + (L/2) * esc, yTopo - fArco * 2, x0 + L * esc + B * esc, yTopo);
+            ctx.stroke();
+        } else if (forma === "paralela") {
+            const hT = inc;
+            yPico = yTopo - hT * esc;
+            ctx.strokeRect(x0 - B * esc, yPico, (L + B * 2) * esc, hT * esc);
+        } else if (forma === "umaAgua") {
+            const f = L * (inc/100);
+            yPico = yTopo - f * esc;
+            ctx.beginPath();
+            ctx.moveTo(x0 - B * esc, yTopo);
+            ctx.lineTo(x0 + L * esc + B * esc, yPico);
+            ctx.stroke();
+        }
+
+        // Medidas no corte
+        ctx.fillStyle = "#e67e22";
+        ctx.font = "bold 14px Arial";
+        ctx.strokeStyle = "rgba(230, 126, 34, 0.4)";
+        ctx.lineWidth = 1;
+
+        // Largura
+        ctx.beginPath();
+        ctx.moveTo(x0, yBase + 40);
+        ctx.lineTo(x0 + L * esc, yBase + 40);
+        ctx.stroke();
+        ctx.fillText(`${L}m (Largura)`, x0 + (L * esc/2) - 45, yBase + 60);
+
+        // Altura pilar
+        ctx.beginPath();
+        ctx.moveTo(x0 - 60, yBase);
+        ctx.lineTo(x0 - 60, yTopo);
+        ctx.stroke();
+        ctx.save();
+        ctx.translate(x0 - 80, yTopo + (H * esc/2));
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText(`Pé-direito: ${H}m`, -40, 0);
+        ctx.restore();
+
+        // Altura total
+        const hTotal = (yBase - yPico) / esc;
+        ctx.beginPath();
+        ctx.moveTo(x0 + L * esc + 60, yBase);
+        ctx.lineTo(x0 + L * esc + 60, yPico);
+        ctx.stroke();
+        ctx.fillText(`${hTotal.toFixed(2)}m`, x0 + L * esc + 65, yPico + (yBase - yPico)/2);
+
+        // Beiral
+        if (B > 0) {
+            ctx.beginPath();
+            ctx.moveTo(x0 - B * esc, yTopo - 25);
+            ctx.lineTo(x0, yTopo - 25);
+            ctx.stroke();
+            ctx.font = "11px Arial";
+            ctx.fillText(`${B}m beiral`, x0 - B * esc, yTopo - 30);
+        }
+    }
+
+    // ===== DESENHO DA PLANTA DE COBERTURA =====
+    function desenharPlantaTercasGrande() {
+        const canvas = document.getElementById("canvasPlantaTercasVis");
+        const ctx = canvas.getContext("2d");
+        const L = parseFloat(document.getElementById("largura").value) || 1;
+        const C = parseFloat(document.getElementById("comprimento").value) || 1;
+        const B = parseFloat(document.getElementById("beiral").value) || 0;
+        const d = parseFloat(document.getElementById("distancia").value) || 1;
+        const espTercas = parseFloat(document.getElementById("espacamentoTercas").value) || 1.2;
+        const inc = parseFloat(document.getElementById("inclinacao").value) || 0;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const padding = 80;
+        const esc = Math.min((canvas.width - padding * 2) / L, (canvas.height - padding * 2) / C);
+        const xOff = (canvas.width - L * esc) / 2;
+        const yOff = (canvas.height - C * esc) / 2;
+
+        // Contorno
+        ctx.strokeStyle = "#555";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(xOff, yOff, L * esc, C * esc);
+
+        // Treliças (vigas principais)
+        const quantTrelicas = Math.round(C / d) + 1;
+        ctx.strokeStyle = "#2c3e50";
+        ctx.lineWidth = 4;
+        for (let i = 0; i < quantTrelicas; i++) {
+            const py = yOff + (i * (C / (quantTrelicas - 1)) * esc);
+            ctx.beginPath();
+            ctx.moveTo(xOff, py);
+            ctx.lineTo(xOff + L * esc, py);
+            ctx.stroke();
+        }
+
+        // Terças
+        ctx.strokeStyle = "#e67e22";
+        ctx.lineWidth = 2;
+        const compInclinado = Math.sqrt(Math.pow(L, 2) + Math.pow((L * inc/100), 2));
+        const totalLinhas = Math.ceil((compInclinado + B * 2) / espTercas) + 1;
+        for (let j = 0; j < totalLinhas; j++) {
+            const px = xOff + (j * (L / (totalLinhas - 1)) * esc);
+            ctx.beginPath();
+            ctx.moveTo(px, yOff);
+            ctx.lineTo(px, yOff + C * esc);
+            ctx.stroke();
+        }
+
+        // Medidas
+        ctx.fillStyle = "#e67e22";
+        ctx.font = "bold 14px Arial";
+        ctx.fillText(`${L}m`, xOff + (L * esc/2) - 20, yOff - 20);
+        ctx.save();
+        ctx.translate(xOff - 30, yOff + (C * esc/2));
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText(`${C}m`, -15, 0);
+        ctx.restore();
+        
+        // Legenda
+        ctx.font = "12px Arial";
+        ctx.fillStyle = "#666";
+        ctx.fillText(`${quantTrelicas} treliças • ${totalLinhas} terças • Espaç.: ${espTercas}m`, xOff, yOff + C * esc + 30);
+    }
+
+    // ===== ALTERNAR COLUNAS INTERNAS =====
+    function alternarColunasInternas() {
+        const opcao = document.getElementById("configColunas").value;
+        const L = parseFloat(document.getElementById("largura").value);
+        const C = parseFloat(document.getElementById("comprimento").value);
+        const d = parseFloat(document.getElementById("distancia").value);
+        const vaosX = Math.round(L / d);
+        const vaosY = Math.round(C / d);
+
+        pilaresOcultos.clear();
+        if (opcao === "vazio") {
+            for (let j = 1; j < vaosY; j++) {
+                for (let i = 1; i < vaosX; i++) {
+                    pilaresOcultos.add(`p-${j}-${i}`);
+                }
+            }
+        }
+        atualizarDesenhos();
+    }
+
+    // ===== ADICIONAR ITEM EXTRA =====
+    function adicionarItemExtra() {
+        const nome = document.getElementById("nomeExtra").value.trim();
+        const valor = parseFloat(document.getElementById("valorExtra").value);
+        
+        if (!nome || isNaN(valor) || valor <= 0) {
+            alert("❌ Preencha o nome e valor do item extra!");
+            return;
+        }
+        
+        itensExtras.push({ nome, valor });
+        document.getElementById("nomeExtra").value = "";
+        document.getElementById("valorExtra").value = "";
+        
+        atualizarListaExtras();
+        calcularTudo();
+    }
+
+    function atualizarListaExtras() {
+        const container = document.getElementById("listaExtrasAdicionados");
+        if (itensExtras.length === 0) {
+            container.innerHTML = '<em style="color:#999">Nenhum item extra adicionado.</em>';
+            return;
+        }
+        
+        container.innerHTML = itensExtras.map((item, idx) => `
+            <div class="extra-item">
+                <span><strong>${item.nome}</strong>: R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                <button onclick="removerItemExtra(${idx})">❌</button>
+            </div>
+        `).join('');
+    }
+
+    function removerItemExtra(idx) {
+        itensExtras.splice(idx, 1);
+        atualizarListaExtras();
+        calcularTudo();
+    }
+
+    // ===== CÁLCULO COMPLETO =====
+    function calcularTudo() {
+        // Obter valores
+        const L = parseFloat(document.getElementById("largura").value);
+        const C = parseFloat(document.getElementById("comprimento").value);
+        const H = parseFloat(document.getElementById("alturaPilar").value);
+        const B = parseFloat(document.getElementById("beiral").value);
+        const dist = parseFloat(document.getElementById("distancia").value);
+        const inc = parseFloat(document.getElementById("inclinacao").value);
+        const espacTercas = parseFloat(document.getElementById("espacamentoTercas").value);
+        
+        // Preços
+        const precoAco = parseFloat(document.getElementById("precoAco").value) || 0;
+        const tipoTelha = document.getElementById("tipoTelha").value;
+        const precoTelha = tipoTelha === "termoacustica" ? 
+            parseFloat(document.getElementById("precoTelha").value) : 
+            parseFloat(document.getElementById("precoTelhaSimples").value);
+        const precoMaoObra = parseFloat(document.getElementById("precoMaoObra").value) || 0;
+        const precoFundacao = parseFloat(document.getElementById("precoFundacao").value) || 0;
+        const precoParafusos = parseFloat(document.getElementById("precoParafusos").value) || 0;
+        const precoPintura = parseFloat(document.getElementById("precoPintura").value) || 0;
+        const percFrete = parseFloat(document.getElementById("percFrete").value) || 0;
+        const percContingencia = parseFloat(document.getElementById("percContingencia").value) || 0;
+        const bdiFator = parseFloat(document.getElementById("bdi").value) / 100;
+        
+        // Cálculo de perfil da coluna
+        const tipoPerfil = document.getElementById("perfilColuna").value;
+        const espessuraMm = parseFloat(document.getElementById("espessuraColuna").value) || 2.65;
+        
+        let perimetro = 0.50; // Padrão U
+        if (tipoPerfil === "W") perimetro = 0.85;
+        if (tipoPerfil === "H") perimetro = 1.10;
+        if (tipoPerfil === "Tubo") perimetro = 0.60;
+        if (tipoPerfil === "Redondo") perimetro = 0.45;
+        
+        const pesoPorMetroPilar = (perimetro * (espessuraMm / 1000)) * 7850;
+        
+        // Cálculo de pilares
+        const pilaresAtivos = document.querySelectorAll(".ponto.ativo").length;
+        const pesoPilares = pilaresAtivos * (H * pesoPorMetroPilar);
+        const custoPilares = pesoPilares * precoAco;
+        
+        // Cálculo de treliças
+        const quantTrelicas = Math.round(C / dist) + 1;
+        const pesoTrelicas = quantTrelicas * (L * 22); // kg por treliça
+        const custoTrelicas = pesoTrelicas * precoAco;
+        
+        // Cálculo de terças
+        const compInclinado = Math.sqrt(Math.pow(L, 2) + Math.pow((L * inc/100), 2));
+        const linhasTercas = Math.ceil((compInclinado + B * 2) / espacTercas) + 1;
+        const metrosTercas = linhasTercas * C;
+        const pesoTercas = metrosTercas * 7.2; // kg/m médio
+        const custoTercas = pesoTercas * precoAco;
+        
+        // Total de aço
+        const totalAco = pesoPilares + pesoTrelicas + pesoTercas;
+        
+        // Cálculo de telhas
+        const areaReal = (L * C) * (1 + (inc/100) * 0.15);
+        const custoTelhas = areaReal * precoTelha;
+        
+        // Fundações
+        const custoFundacao = pilaresAtivos * precoFundacao;
+        
+        // Mão de obra
+        const custoMaoObra = areaReal * precoMaoObra;
+        
+        // Parafusos e pintura
+        const custoParafusos = totalAco * precoParafusos;
+        const custoPintura = totalAco * precoPintura;
+        
+        // Subtotal materiais
+        const subtotalMateriais = custoPilares + custoTrelicas + custoTercas + custoTelhas + custoFundacao;
+        
+        // Subtotal serviços
+        const subtotalServicos = custoMaoObra + custoParafusos + custoPintura;
+        
+        // Itens extras
+        const totalExtras = itensExtras.reduce((sum, item) => sum + item.valor, 0);
+        
+        // Subtotal geral
+        const subtotalGeral = subtotalMateriais + subtotalServicos + totalExtras;
+        
+        // Frete e contingência
+        const valorFrete = subtotalGeral * (percFrete / 100);
+        const valorContingencia = subtotalGeral * (percContingencia / 100);
+        
+        // Total com ajustes
+        const totalComAjustes = subtotalGeral + valorFrete + valorContingencia;
+        
+        // BDI
+        const valorBDI = totalComAjustes * bdiFator;
+        
+        // TOTAL FINAL
+        const totalFinal = totalComAjustes + valorBDI;
+
+        // ===== ATUALIZAR RESUMO FINANCEIRO =====
+        document.getElementById("orcamentoFinal").innerHTML = `
+            <div class="resumo-linha">
+                <span>💪 Aço Total:</span>
+                <strong>${totalAco.toFixed(0)} kg</strong>
+            </div>
+            <div class="resumo-linha">
+                <span>🏗️ Colunas:</span>
+                <strong>${pilaresAtivos} unidades</strong>
+            </div>
+            <div class="resumo-linha">
+                <span>🔩 Treliças:</span>
+                <strong>${quantTrelicas} unidades</strong>
+            </div>
+            <div class="resumo-linha">
+                <span>📏 Terças:</span>
+                <strong>${metrosTercas.toFixed(1)} metros</strong>
+            </div>
+            <div class="resumo-linha">
+                <span>🏠 Área de Cobertura:</span>
+                <strong>${areaReal.toFixed(1)} m²</strong>
+            </div>
+            <hr style="opacity:0.3; margin: 15px 0">
+            <div class="resumo-linha">
+                <span>💰 Materiais:</span>
+                <strong>R$ ${subtotalMateriais.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+            </div>
+            <div class="resumo-linha">
+                <span>🔧 Serviços:</span>
+                <strong>R$ ${subtotalServicos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+            </div>
+            ${totalExtras > 0 ? `
+            <div class="resumo-linha">
+                <span>➕ Extras:</span>
+                <strong>R$ ${totalExtras.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+            </div>
+            ` : ''}
+            <div class="resumo-linha">
+                <span>🚚 Frete (${percFrete}%):</span>
+                <strong>R$ ${valorFrete.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+            </div>
+            <div class="resumo-linha">
+                <span>⚠️ Contingência (${percContingencia}%):</span>
+                <strong>R$ ${valorContingencia.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+            </div>
+            <div class="resumo-linha" style="color: var(--success)">
+                <span>📈 BDI/Lucro (${(bdiFator*100).toFixed(0)}%):</span>
+                <strong>R$ ${valorBDI.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+            </div>
+            <div class="resumo-total">
+                💎 TOTAL: R$ ${totalFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+            </div>
+        `;
+
+        // ===== ATUALIZAR LISTA ORÇAMENTÁRIA =====
+        let htmlTabela = `
+            <table class="tabela-orcamento">
+                <thead>
+                    <tr>
+                        <th>ITEM</th>
+                        <th>DESCRIÇÃO</th>
+                        <th>UNID</th>
+                        <th>QUANT</th>
+                        <th>PREÇO UNIT.</th>
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1.0</td>
+                        <td><strong>ESTRUTURA METÁLICA</strong></td>
+                        <td colspan="4"></td>
+                    </tr>
+                    <tr>
+                        <td>1.1</td>
+                        <td>Pilares (${tipoPerfil} - ${espessuraMm}mm)</td>
+                        <td>un</td>
+                        <td>${pilaresAtivos}</td>
+                        <td>R$ ${(custoPilares/pilaresAtivos).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${custoPilares.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr>
+                        <td>1.2</td>
+                        <td>Treliças Metálicas</td>
+                        <td>un</td>
+                        <td>${quantTrelicas}</td>
+                        <td>R$ ${(custoTrelicas/quantTrelicas).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${custoTrelicas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr>
+                        <td>1.3</td>
+                        <td>Terças Metálicas</td>
+                        <td>m</td>
+                        <td>${metrosTercas.toFixed(1)}</td>
+                        <td>R$ ${(custoTercas/metrosTercas).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${custoTercas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr style="background: #f8f9fa; font-weight: bold">
+                        <td colspan="5">SUBTOTAL ESTRUTURA</td>
+                        <td>R$ ${(custoPilares+custoTrelicas+custoTercas).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr>
+                        <td>2.0</td>
+                        <td><strong>COBERTURA</strong></td>
+                        <td colspan="4"></td>
+                    </tr>
+                    <tr>
+                        <td>2.1</td>
+                        <td>Telha ${tipoTelha === 'termoacustica' ? 'Termoacústica' : 'Metálica Simples'}</td>
+                        <td>m²</td>
+                        <td>${areaReal.toFixed(1)}</td>
+                        <td>R$ ${precoTelha.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${custoTelhas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr>
+                        <td>3.0</td>
+                        <td><strong>FUNDAÇÕES</strong></td>
+                        <td colspan="4"></td>
+                    </tr>
+                    <tr>
+                        <td>3.1</td>
+                        <td>Base/Fundação para Pilares</td>
+                        <td>un</td>
+                        <td>${pilaresAtivos}</td>
+                        <td>R$ ${precoFundacao.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${custoFundacao.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr>
+                        <td>4.0</td>
+                        <td><strong>SERVIÇOS</strong></td>
+                        <td colspan="4"></td>
+                    </tr>
+                    <tr>
+                        <td>4.1</td>
+                        <td>Montagem e Mão de Obra</td>
+                        <td>m²</td>
+                        <td>${areaReal.toFixed(1)}</td>
+                        <td>R$ ${precoMaoObra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${custoMaoObra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr>
+                        <td>4.2</td>
+                        <td>Parafusos e Fixações</td>
+                        <td>kg</td>
+                        <td>${totalAco.toFixed(0)}</td>
+                        <td>R$ ${precoParafusos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${custoParafusos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr>
+                        <td>4.3</td>
+                        <td>Pintura/Proteção</td>
+                        <td>kg</td>
+                        <td>${totalAco.toFixed(0)}</td>
+                        <td>R$ ${precoPintura.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${custoPintura.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+        `;
+
+        // Adicionar itens extras
+        if (itensExtras.length > 0) {
+            htmlTabela += `
+                    <tr>
+                        <td>5.0</td>
+                        <td><strong>ITENS EXTRAS</strong></td>
+                        <td colspan="4"></td>
+                    </tr>
+            `;
+            itensExtras.forEach((item, idx) => {
+                htmlTabela += `
+                    <tr>
+                        <td>5.${idx+1}</td>
+                        <td>${item.nome}</td>
+                        <td>un</td>
+                        <td>1</td>
+                        <td>R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        htmlTabela += `
+                    <tr style="background: #ecf0f1; font-weight: bold">
+                        <td colspan="5">SUBTOTAL GERAL</td>
+                        <td>R$ ${subtotalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">Frete e Logística (${percFrete}%)</td>
+                        <td>R$ ${valorFrete.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">Contingências e Perdas (${percContingencia}%)</td>
+                        <td>R$ ${valorContingencia.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr style="background: #d5f4e6; font-weight: bold">
+                        <td colspan="5">BDI / Lucro (${(bdiFator*100).toFixed(0)}%)</td>
+                        <td>R$ ${valorBDI.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                    <tr style="background: var(--primary); color: white; font-weight: bold; font-size: 16px">
+                        <td colspan="5">VALOR TOTAL DO ORÇAMENTO</td>
+                        <td>R$ ${totalFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+        
+        document.getElementById("listaOrcamentoDetalhada").innerHTML = htmlTabela;
+
+        // ===== ATUALIZAR LISTA DE MATERIAIS =====
+        document.getElementById("listaMateriais").innerHTML = `
+            <table class="tabela-orcamento">
+                <thead>
+                    <tr>
+                        <th>MATERIAL</th>
+                        <th>QUANTIDADE</th>
+                        <th>PESO/ÁREA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Pilares ${tipoPerfil} (${espessuraMm}mm)</td>
+                        <td>${pilaresAtivos} unidades</td>
+                        <td>${pesoPilares.toFixed(0)} kg</td>
+                    </tr>
+                    <tr>
+                        <td>Treliças Metálicas</td>
+                        <td>${quantTrelicas} unidades</td>
+                        <td>${pesoTrelicas.toFixed(0)} kg</td>
+                    </tr>
+                    <tr>
+                        <td>Terças</td>
+                        <td>${metrosTercas.toFixed(1)} metros</td>
+                        <td>${pesoTercas.toFixed(0)} kg</td>
+                    </tr>
+                    <tr style="background: #f8f9fa; font-weight: bold">
+                        <td>TOTAL AÇO</td>
+                        <td>-</td>
+                        <td>${totalAco.toFixed(0)} kg</td>
+                    </tr>
+                    <tr>
+                        <td>Telhas ${tipoTelha === 'termoacustica' ? 'Termoacústicas' : 'Metálicas'}</td>
+                        <td>${areaReal.toFixed(1)} m²</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Fundações</td>
+                        <td>${pilaresAtivos} unidades</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Parafusos (estimativa 3%)</td>
+                        <td>-</td>
+                        <td>${(totalAco * 0.03).toFixed(1)} kg</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+
+        // ===== ATUALIZAR CONSUMO DE MATERIAIS =====
+        document.getElementById("listaConsumo").innerHTML = `
+            <div class="card-consumo">
+                <h5>🏗️ Pilares</h5>
+                <p>${pilaresAtivos} un</p>
+                <small>${pesoPilares.toFixed(0)} kg</small>
+            </div>
+            <div class="card-consumo">
+                <h5>🔩 Treliças</h5>
+                <p>${quantTrelicas} un</p>
+                <small>${pesoTrelicas.toFixed(0)} kg</small>
+            </div>
+            <div class="card-consumo">
+                <h5>📏 Terças</h5>
+                <p>${metrosTercas.toFixed(1)} m</p>
+                <small>${pesoTercas.toFixed(0)} kg</small>
+            </div>
+            <div class="card-consumo">
+                <h5>🏠 Telhas</h5>
+                <p>${areaReal.toFixed(1)} m²</p>
+                <small>${tipoTelha === 'termoacustica' ? 'Termoacústica' : 'Simples'}</small>
+            </div>
+            <div class="card-consumo">
+                <h5>💪 Aço Total</h5>
+                <p>${totalAco.toFixed(0)} kg</p>
+                <small>${(totalAco/1000).toFixed(2)} ton</small>
+            </div>
+            <div class="card-consumo">
+                <h5>💰 Valor Total</h5>
+                <p>R$ ${(totalFinal/1000).toFixed(1)}k</p>
+                <small>Com BDI</small>
+            </div>
+        `;
+
+        // ===== ANÁLISE CUSTOMIZADA =====
+        const custoPorM2 = totalFinal / areaReal;
+        const custoPorKgAco = totalFinal / totalAco;
+        
+        document.getElementById("analiseCustomizada").innerHTML = `
+            <div class="card-consumo">
+                <h5>💵 Custo por m²</h5>
+                <p>R$ ${custoPorM2.toFixed(2)}</p>
+            </div>
+            <div class="card-consumo">
+                <h5>⚖️ Custo por kg de Aço</h5>
+                <p>R$ ${custoPorKgAco.toFixed(2)}</p>
+            </div>
+            <div class="card-consumo">
+                <h5>📊 Peso por m²</h5>
+                <p>${(totalAco/areaReal).toFixed(2)} kg/m²</p>
+            </div>
+            <div class="card-consumo">
+                <h5>🎯 Área Total</h5>
+                <p>${areaReal.toFixed(1)} m²</p>
+            </div>
+            <div class="info-box">
+                <strong>📈 Composição de Custos:</strong><br>
+                Materiais: ${((subtotalMateriais/totalFinal)*100).toFixed(1)}% • 
+                Serviços: ${((subtotalServicos/totalFinal)*100).toFixed(1)}% • 
+                BDI: ${((valorBDI/totalFinal)*100).toFixed(1)}%
+            </div>
+        `;
+
+        // ===== DETALHAMENTO TÉCNICO =====
+        document.getElementById("detalhamentoTecnico").innerHTML = `
+            <h4>📐 Dimensões Gerais</h4>
+            <ul style="list-style: none; padding: 0">
+                <li>✓ Largura: ${L} m</li>
+                <li>✓ Comprimento: ${C} m</li>
+                <li>✓ Área em planta: ${(L*C).toFixed(1)} m²</li>
+                <li>✓ Área de cobertura: ${areaReal.toFixed(1)} m²</li>
+                <li>✓ Pé-direito: ${H} m</li>
+                <li>✓ Beiral: ${B} m</li>
+                <li>✓ Inclinação: ${inc}%</li>
+            </ul>
+            
+            <h4 style="margin-top: 20px">🏗️ Estrutura</h4>
+            <ul style="list-style: none; padding: 0">
+                <li>✓ Colunas: ${pilaresAtivos} unidades - Perfil ${tipoPerfil} ${espessuraMm}mm</li>
+                <li>✓ Treliças: ${quantTrelicas} unidades (espaçadas a cada ${dist}m)</li>
+                <li>✓ Terças: ${linhasTercas} linhas × ${C}m = ${metrosTercas.toFixed(1)}m totais</li>
+                <li>✓ Peso estrutura: ${totalAco.toFixed(0)} kg (${(totalAco/1000).toFixed(2)} ton)</li>
+            </ul>
+            
+            <h4 style="margin-top: 20px">🏠 Cobertura</h4>
+            <ul style="list-style: none; padding: 0">
+                <li>✓ Tipo: ${tipoTelha === 'termoacustica' ? 'Termoacústica' : 'Metálica Simples'}</li>
+                <li>✓ Área: ${areaReal.toFixed(1)} m²</li>
+                <li>✓ Modelo: ${document.getElementById("forma").options[document.getElementById("forma").selectedIndex].text}</li>
+            </ul>
+        `;
+    }
+
+    // ===== SALVAR ORÇAMENTO =====
+    function salvarOrcamento() {
+        const nome = prompt("📝 Nome do orçamento:", `Galpão ${new Date().toLocaleDateString('pt-BR')}`);
+        if (!nome) return;
+        
+        const orcamento = {
+            id: Date.now(),
+            nome: nome,
+            data: new Date().toISOString(),
+            parametros: {
+                largura: document.getElementById("largura").value,
+                comprimento: document.getElementById("comprimento").value,
+                alturaPilar: document.getElementById("alturaPilar").value,
+                forma: document.getElementById("forma").value,
+                perfilColuna: document.getElementById("perfilColuna").value,
+                espessuraColuna: document.getElementById("espessuraColuna").value,
+                distancia: document.getElementById("distancia").value,
+                beiral: document.getElementById("beiral").value,
+                inclinacao: document.getElementById("inclinacao").value,
+                espacamentoTercas: document.getElementById("espacamentoTercas").value,
+                tipoTelha: document.getElementById("tipoTelha").value,
+                bdi: document.getElementById("bdi").value
+            },
+            itensExtras: [...itensExtras],
+            pilaresOcultos: Array.from(pilaresOcultos),
+            cliente: {...dadosCliente}
+        };
+        
+        orcamentosSalvos.push(orcamento);
+        localStorage.setItem('orcamentos', JSON.stringify(orcamentosSalvos));
+        
+        alert(`✅ Orçamento "${nome}" salvo com sucesso!`);
+    }
+
+    // ===== MODAL CLIENTE =====
+    function abrirModalCliente() {
+        document.getElementById("modalCliente").style.display = "block";
+        
+        // Carregar dados se existirem
+        document.getElementById("clienteNome").value = dadosCliente.nome || "";
+        document.getElementById("clienteCPFCNPJ").value = dadosCliente.cpfcnpj || "";
+        document.getElementById("clienteTelefone").value = dadosCliente.telefone || "";
+        document.getElementById("clienteEmail").value = dadosCliente.email || "";
+        document.getElementById("clienteEndereco").value = dadosCliente.endereco || "";
+        document.getElementById("clienteObs").value = dadosCliente.obs || "";
+    }
+
+    function fecharModalCliente() {
+        document.getElementById("modalCliente").style.display = "none";
+    }
+
+    function salvarDadosCliente() {
+        dadosCliente = {
+            nome: document.getElementById("clienteNome").value,
+            cpfcnpj: document.getElementById("clienteCPFCNPJ").value,
+            telefone: document.getElementById("clienteTelefone").value,
+            email: document.getElementById("clienteEmail").value,
+            endereco: document.getElementById("clienteEndereco").value,
+            obs: document.getElementById("clienteObs").value
+        };
+        
+        fecharModalCliente();
+        alert("✅ Dados do cliente salvos!");
+    }
+
+    // ===== MODAL ORÇAMENTOS =====
+    function abrirModalOrcamentos() {
+        document.getElementById("modalOrcamentos").style.display = "block";
+        
+        const lista = document.getElementById("listaOrcamentosSalvos");
+        if (orcamentosSalvos.length === 0) {
+            lista.innerHTML = '<p style="text-align:center; color:#999">Nenhum orçamento salvo ainda.</p>';
+            return;
+        }
+        
+        lista.innerHTML = orcamentosSalvos.map(orc => `
+            <div class="orcamento-salvo" onclick="carregarOrcamento(${orc.id})">
+                <strong>${orc.nome}</strong><br>
+                <small>${new Date(orc.data).toLocaleString('pt-BR')}</small><br>
+                <small>${orc.parametros.largura}m × ${orc.parametros.comprimento}m • Perfil: ${orc.parametros.perfilColuna}</small>
+            </div>
+        `).join('');
+    }
+
+    function fecharModalOrcamentos() {
+        document.getElementById("modalOrcamentos").style.display = "none";
+    }
+
+    function carregarOrcamento(id) {
+        const orc = orcamentosSalvos.find(o => o.id === id);
+        if (!orc) return;
+        
+        // Restaurar parâmetros
+        Object.keys(orc.parametros).forEach(key => {
+            const elem = document.getElementById(key);
+            if (elem) elem.value = orc.parametros[key];
+        });
+        
+        // Restaurar extras
+        itensExtras = [...orc.itensExtras];
+        atualizarListaExtras();
+        
+        // Restaurar pilares ocultos
+        pilaresOcultos = new Set(orc.pilaresOcultos);
+        
+        // Restaurar cliente
+        dadosCliente = {...orc.cliente};
+        
+        fecharModalOrcamentos();
+        redesenharTudo();
+        
+        alert(`✅ Orçamento "${orc.nome}" carregado!`);
+    }
+
+    // ===== GERAR RELATÓRIO PDF =====
+    function gerarRelatorioCompleto() {
+        alert("📄 Gerando relatório em PDF...\n\n⚠️ NOTA: Para exportar PDF real, você precisa integrar uma biblioteca como jsPDF ou usar window.print().\n\nPor ora, use a função de impressão do navegador (Ctrl+P) e escolha 'Salvar como PDF'.");
+        window.print();
+    }
+
+    // ===== INICIALIZAÇÃO =====
+    window.onload = () => {
+        redesenharTudo();
+        switchTab(0);
+        atualizarListaExtras();
+    };
+
+    // Fechar modais ao clicar fora
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
